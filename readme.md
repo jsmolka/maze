@@ -21,4 +21,5 @@ If you want to run the visual examples in the visual directory you have to insta
 
 ## Requirements
 - NumPy
+- Pillow
 - [pyprocessing](https://github.com/jsmolka/pyprocessing) if you want to run the visual examples
