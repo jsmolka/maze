@@ -13,6 +13,8 @@ m.save_solution_as_png()  # Save the solution as png
 ```
 The code above creates the following pictures:
 
+![https://raw.githubusercontent.com/jsmolka/maze/master/example/maze.png] ![https://raw.githubusercontent.com/jsmolka/maze/master/example/solution.png]
+
 In the algorithm part of create and solve you can choose between different algorithms create and solve the maze. Currently there are 6 algorithms for creating and 1 algorithm for solving.
 
 If you want to run the visual examples in the visual directory you have to install the [pyprocessing](https://github.com/jsmolka/pyprocessing).
