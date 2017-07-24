@@ -19,6 +19,10 @@ In the algorithm part of create and solve you can choose between different algor
 
 If you want to run the visual examples in the visual directory you have to install the [pyprocessing](https://github.com/jsmolka/pyprocessing).
 
+A demonstration of the visual examples can be found here:
+
+![Maze video](https://www.youtube.com/watch?v=6kv5HKPB1XU)
+
 ## Requirements
 - NumPy
 - [pyprocessing](https://github.com/jsmolka/pyprocessing) if you want to run the visual examples
