@@ -397,10 +397,14 @@ class Maze:
         if end == 0:
             end = (self.__row_count_without_walls - 1, self.__col_count_without_walls - 1)
 
-        if self.__col_count_without_walls < (start[0] or end[0]) < 0:
-            raise Exception("Start or end x value is out of range")
-        if self.__row_count_without_walls < (start[1] or end[1]) < 0:
-            raise Exception("Start or end y value is out of range")
+        if not 0 <= start[0] < self.__row_count_without_walls:
+            raise Exception("Start row value is out of range")
+        if not 0 <= end[0] < self.__row_count_without_walls:
+            raise Exception("End row value is out of range")
+        if not 0 <= start[1] < self.__col_count_without_walls:
+            raise Exception("Start column value is out of range")
+        if not 0 <= end[1] < self.__col_count_without_walls:
+            raise Exception("End column value is out of range")
 
         start = tuple([2 * x + 1 for x in start])
         end = tuple([2 * x + 1 for x in end])
