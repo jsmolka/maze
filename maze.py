@@ -398,10 +398,10 @@ class Maze:
 
         if not 0 <= start[0] < self.__row_count_without_walls:
             raise Exception("Start row value is out of range")
-        if not 0 <= end[0] < self.__row_count_without_walls:
-            raise Exception("End row value is out of range")
         if not 0 <= start[1] < self.__col_count_without_walls:
             raise Exception("Start column value is out of range")
+        if not 0 <= end[0] < self.__row_count_without_walls:
+            raise Exception("End row value is out of range")
         if not 0 <= end[1] < self.__col_count_without_walls:
             raise Exception("End column value is out of range")
 
