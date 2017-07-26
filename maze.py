@@ -67,7 +67,7 @@ class Maze:
         if (row_count or col_count) <= 0:
             raise Exception("Row or column count cannot be smaller than zero")
 
-        # Create row and column counts
+        # Set row and column counts
         self.__row_count_without_walls = row_count
         self.__col_count_without_walls = col_count
         self.__row_count_with_walls = 2 * row_count + 1
@@ -95,10 +95,7 @@ class Maze:
 
     def __check_indices(self, x, y):
         """Checks if indices are in the maze"""
-        if 0 <= x < self.__row_count_with_walls and 0 <= y < self.__col_count_with_walls:
-            return True
-        else:
-            return False
+        return True if 0 <= x < self.__row_count_with_walls and 0 <= y < self.__col_count_with_walls else False
 
     def __create_walk(self, x, y):
         """Walks over maze"""
@@ -391,6 +388,8 @@ class Maze:
             raise Exception("Maze is not assigned\n"
                             "Use \"create\" or \"load_maze\" method to create or load a maze")
 
+        self.__set_counts()
+
         # Define values for start and end
         if start == 0:
             start = (0, 0)
@@ -408,10 +407,6 @@ class Maze:
 
         start = tuple([2 * x + 1 for x in start])
         end = tuple([2 * x + 1 for x in end])
-
-        # Create row and column counts with walls
-        self.__row_count_with_walls = len(self.maze)
-        self.__col_count_with_walls = len(self.maze[0])
 
         # Copy maze
         self.solution = self.maze.copy()
@@ -484,12 +479,12 @@ class Maze:
             self.__row_count_with_walls = len(self.maze)
             self.__col_count_with_walls = len(self.maze[0])
             self.__row_count_without_walls = len(self.maze) // 2
-            self.__col_count_without_walls = len(self.maze) // 2
+            self.__col_count_without_walls = len(self.maze[0]) // 2
         elif self.solution is not None:
             self.__row_count_with_walls = len(self.solution)
             self.__col_count_with_walls = len(self.solution[0])
             self.__row_count_without_walls = len(self.solution) // 2
-            self.__col_count_without_walls = len(self.solution) // 2
+            self.__col_count_without_walls = len(self.solution[0]) // 2
         else:
             raise Exception("Maze and solution are not assigned")
 
