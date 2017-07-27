@@ -17,7 +17,7 @@ The code above creates the following pictures:
 
 You can choose between different algorithms to create and solve a maze. Currently there are 6 algorithms for creating and 1 algorithm for solving.
 
-If you want to run the visual examples in the visual directory, you have to install the [pyprocessing](https://github.com/jsmolka/pyprocessing).
+If you want to run the visual examples in the visual directory, you have to install [pyprocessing](https://github.com/jsmolka/pyprocessing).
 
 ## Requirements
 - NumPy
