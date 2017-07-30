@@ -35,7 +35,6 @@ class Maze:
     """
     def __init__(self):
         """Constructor"""
-        # Define later
         self.maze = None
         self.solution = None
         self.__row_count_without_walls = None
@@ -43,40 +42,39 @@ class Maze:
         self.__row_count_with_walls = None
         self.__col_count_with_walls = None
 
-        # Define directions
-        N1 = lambda x, y: (x + 2, y)
-        S1 = lambda x, y: (x - 2, y)
-        E1 = lambda x, y: (x, y - 2)
-        W1 = lambda x, y: (x, y + 2)
-        self.__create_directions_one = [N1, S1, E1, W1]
+        self.__create_directions_one = [
+            lambda x, y: (x + 2, y),
+            lambda x, y: (x - 2, y),
+            lambda x, y: (x, y - 2),
+            lambda x, y: (x, y + 2)
+        ]
 
-        N1 = lambda x, y: (x + 1, y)
-        S1 = lambda x, y: (x - 1, y)
-        E1 = lambda x, y: (x, y - 1)
-        W1 = lambda x, y: (x, y + 1)
-        self.__solve_directions_one = [N1, S1, E1, W1]
+        self.__solve_directions_one = [
+            lambda x, y: (x + 1, y),
+            lambda x, y: (x - 1, y),
+            lambda x, y: (x, y - 1),
+            lambda x, y: (x, y + 1)
+        ]
 
-        N2 = lambda x, y: (x + 2, y, x + 1, y)
-        S2 = lambda x, y: (x - 2, y, x - 1, y)
-        E2 = lambda x, y: (x, y - 2, x, y - 1)
-        W2 = lambda x, y: (x, y + 2, x, y + 1)
-        self.__directions_two = [N2, S2, E2, W2]
+        self.__directions_two = [
+            lambda x, y: (x + 2, y, x + 1, y),
+            lambda x, y: (x - 2, y, x - 1, y),
+            lambda x, y: (x, y - 2, x, y - 1),
+            lambda x, y: (x, y + 2, x, y + 1)
+        ]
 
     def create(self, row_count, col_count, algorithm):
         """Creates maze"""
         if (row_count or col_count) <= 0:
             raise Exception("Row or column count cannot be smaller than zero")
 
-        # Set row and column counts
         self.__row_count_without_walls = row_count
         self.__col_count_without_walls = col_count
         self.__row_count_with_walls = 2 * row_count + 1
         self.__col_count_with_walls = 2 * col_count + 1
 
-        # Create empty maze
         self.maze = np.zeros((self.__row_count_with_walls, self.__col_count_with_walls, 3), dtype=np.uint8)
 
-        # Fill empty maze
         if algorithm == Algorithm.Create.BACKTRACKING:
             self.__create_recursive_backtracking()
         elif algorithm == Algorithm.Create.HUNT:
@@ -99,50 +97,39 @@ class Maze:
 
     def __create_walk(self, x, y):
         """Walks over maze"""
-        changed = False
         random.shuffle(self.__directions_two)
         for direction in self.__directions_two:
             tx, ty, bx, by = direction(x, y)
-            if self.__check_indices(tx, ty):
-                if self.maze[tx, ty, 0] == 0:  # Check if cell is unvisited
-                    changed = True
-                    break
+            if self.__check_indices(tx, ty) and self.maze[tx, ty, 0] == 0:
+                self.maze[tx, ty] = self.maze[bx, by] = [255, 255, 255]
+                return tx, ty, True  # Return new cell and continue walking
 
-        if changed:
-            self.maze[tx, ty] = self.maze[bx, by] = [255, 255, 255]
-
-            return tx, ty, True
-        else:
-            return x, y, False
+        return x, y, False  # Return old cell and stop walking
 
     def __create_backtrack(self, stack):
         """Backtracks stack"""
-        while True:
+        while stack:
             x, y = stack.pop()
-            if not stack:
-                return x, y, stack
             for direction in self.__create_directions_one:
                 tx, ty = direction(x, y)
-                if self.__check_indices(tx, ty):
-                    if self.maze[tx, ty, 0] == 0:  # Check if cell unvisited
-                        return x, y, stack  # Return cell with unvisited neighbour
+                if self.__check_indices(tx, ty) and self.maze[tx, ty, 0] == 0:
+                    return x, y, stack  # Return cell with unvisited neighbour
+
+        return None, None, None  # Return stop values if stack is empty
 
     def __create_recursive_backtracking(self):
         """Creates maze with recursive backtracking algorithm"""
-        stack = list()  # List of visited cells
+        stack = list()  # List of visited cells [(x, y), ...]
 
-        # Start with random cell
         x = 2 * random.randint(0, self.__row_count_without_walls - 1) + 1
         y = 2 * random.randint(0, self.__col_count_without_walls - 1) + 1
         self.maze[x, y] = [255, 255, 255]
-        stack.append((x, y))
 
-        while stack:
+        while x:
             walking = True
             while walking:
+                stack.append((x, y))
                 x, y, walking = self.__create_walk(x, y)
-                if walking:
-                    stack.append((x, y))
             x, y, stack = self.__create_backtrack(stack)
 
     def __create_hunt(self, skip_list):
@@ -161,7 +148,7 @@ class Maze:
                             if self.maze[tx, ty, 0] == 255:  # Check if cell has an visited neighbour
                                 return tx, ty, skip_list  # Return visited neighbour
                 if x == self.__row_count_with_walls - 2 and y == self.__col_count_with_walls - 2:
-                    return None, None, None  # Return stop values
+                    return None, None, None  # Return stop values if all rows are finished
             if can_skip:  # Add row to skip list if there was no unvisited cell
                 skip_list.append(x)
 
@@ -174,7 +161,7 @@ class Maze:
         y = 2 * random.randint(0, self.__col_count_without_walls - 1) + 1
         self.maze[x, y] = [255, 255, 255]
 
-        while x:  # End loop when x is None
+        while x:  # Stop at stop value
             walking = True
             while walking:
                 x, y, walking = self.__create_walk(x, y)
