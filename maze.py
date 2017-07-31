@@ -119,11 +119,11 @@ class Maze:
 
     def __create_recursive_backtracking(self):
         """Creates maze with recursive backtracking algorithm"""
-        stack = list()  # List of visited cells [(x, y), ...]
-
         x = 2 * random.randint(0, self.__row_count_without_walls - 1) + 1
         y = 2 * random.randint(0, self.__col_count_without_walls - 1) + 1
         self.maze[x, y] = [255, 255, 255]
+
+        stack = list()  # List of visited cells [(x, y), ...]
 
         while x:
             walking = True
@@ -132,40 +132,37 @@ class Maze:
                 x, y, walking = self.__create_walk(x, y)
             x, y, stack = self.__create_backtrack(stack)
 
-    def __create_hunt(self, skip_list):
+    def __create_hunt(self, hunt_list):
         """Scans maze for new position"""
-        for x in range(1, self.__row_count_with_walls - 1, 2):
-            if x in skip_list:  # Continue if row can be skipped
-                continue
-            can_skip = True
-            for y in range(1, self.__col_count_with_walls - 1, 2):
-                if self.maze[x, y, 0] == 0:  # Check if cell is unvisited
-                    can_skip = False
-                    random.shuffle(self.__create_directions_one)
-                    for direction in self.__create_directions_one:
-                        tx, ty = direction(x, y)
-                        if self.__check_indices(tx, ty):
-                            if self.maze[tx, ty, 0] == 255:  # Check if cell has an visited neighbour
-                                return tx, ty, skip_list  # Return visited neighbour
-                if x == self.__row_count_with_walls - 2 and y == self.__col_count_with_walls - 2:
-                    return None, None, None  # Return stop values if all rows are finished
-            if can_skip:  # Add row to skip list if there was no unvisited cell
-                skip_list.append(x)
+        while hunt_list:
+            for x in hunt_list:
+                finished = True
+                for y in range(1, self.__col_count_with_walls - 1, 2):
+                    if self.maze[x, y, 0] == 0:
+                        finished = False
+                        random.shuffle(self.__create_directions_one)
+                        for direction in self.__create_directions_one:
+                            tx, ty = direction(x, y)
+                            if self.__check_indices(tx, ty) and self.maze[tx, ty, 0] == 255:
+                                return tx, ty, hunt_list  # Return visited neighbour of unvisited cell
+                if finished:
+                    hunt_list.remove(x)  # Remove finished row
+
+        return None, None, None  # Return stop values if all rows are finished
 
     def __create_hunt_and_kill(self):
         """Creates maze with hunt and kill algorithm"""
-        skip_list = list()  # List with rows that can be skipped during hunting
-
-        # Start with random cell
         x = 2 * random.randint(0, self.__row_count_without_walls - 1) + 1
         y = 2 * random.randint(0, self.__col_count_without_walls - 1) + 1
         self.maze[x, y] = [255, 255, 255]
 
-        while x:  # Stop at stop value
+        hunt_list = list(range(1, self.__row_count_with_walls - 1, 2))  # List of unfinished rows [x, ...]
+
+        while x:
             walking = True
             while walking:
                 x, y, walking = self.__create_walk(x, y)
-            x, y, skip_list = self.__create_hunt(skip_list)
+            x, y, hunt_list = self.__create_hunt(hunt_list)
 
     def __create_eller(self):
         """Creates maze with Eller's algorithm"""
