@@ -425,7 +425,7 @@ class Maze:
 
     def __solve_depth_first_search(self, start, end):
         """Solves maze with depth-first search"""
-        visited_cells = self.maze.copy()  # 2D list of visited cells, value of visited cell is [0, ?, ?]
+        visited_cells = self.maze.copy()  # List of visited cells, value of visited cell is [0, ?, ?]
         stack = list()  # List of visited cells [(x, y), ...]
 
         x, y = start
