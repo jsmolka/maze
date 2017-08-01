@@ -58,7 +58,6 @@ def walk():
     # tx, ty = test x, y for testing
     # bx, by = between x, y between new and old x, y
     changed = False
-    random.shuffle(directions_two)
     for direction in directions_two:
         tx, ty, bx, by = direction(x, y)
         if visited_cells[bx, by, 0] == 255:  # Check if cell is unvisited

@@ -19,7 +19,7 @@ class Algorithm:
         KRUSKAL = "Kruskal's algorithm"
 
     class Solve(Enum):
-        BACKTRACKING = "Recursive backtracking algorithm"
+        DEPTH = "Depth-first search"
 
 
 class Maze:
@@ -98,10 +98,10 @@ class Maze:
     def __create_walk(self, x, y):
         """Walks over maze"""
         random.shuffle(self.__directions_two)
-        for direction in self.__directions_two:
+        for direction in self.__directions_two:  # Check adjacent cells randomly
             tx, ty, bx, by = direction(x, y)
-            if self.__check_indices(tx, ty) and self.maze[tx, ty, 0] == 0:
-                self.maze[tx, ty] = self.maze[bx, by] = [255, 255, 255]
+            if self.__check_indices(tx, ty) and self.maze[tx, ty, 0] == 0:  # Check if cell is unvisited
+                self.maze[tx, ty] = self.maze[bx, by] = [255, 255, 255]  # Mark cells as visited
                 return tx, ty, True  # Return new cell and continue walking
 
         return x, y, False  # Return old cell and stop walking
@@ -110,20 +110,20 @@ class Maze:
         """Backtracks stack"""
         while stack:
             x, y = stack.pop()
-            for direction in self.__create_directions_one:
+            for direction in self.__create_directions_one:  # Check adjacent cells
                 tx, ty = direction(x, y)
-                if self.__check_indices(tx, ty) and self.maze[tx, ty, 0] == 0:
+                if self.__check_indices(tx, ty) and self.maze[tx, ty, 0] == 0:  # Check if cell is unvisited
                     return x, y, stack  # Return cell with unvisited neighbour
 
         return None, None, None  # Return stop values if stack is empty
 
     def __create_recursive_backtracking(self):
         """Creates maze with recursive backtracking algorithm"""
+        stack = list()  # List of visited cells [(x, y), ...]
+
         x = 2 * random.randint(0, self.__row_count_without_walls - 1) + 1
         y = 2 * random.randint(0, self.__col_count_without_walls - 1) + 1
         self.maze[x, y] = [255, 255, 255]
-
-        stack = list()  # List of visited cells [(x, y), ...]
 
         while x:
             walking = True
@@ -138,25 +138,26 @@ class Maze:
             for x in hunt_list:
                 finished = True
                 for y in range(1, self.__col_count_with_walls - 1, 2):
-                    if self.maze[x, y, 0] == 0:
+                    if self.maze[x, y, 0] == 0:  # Check if cell is unvisited
                         finished = False
                         random.shuffle(self.__create_directions_one)
-                        for direction in self.__create_directions_one:
+                        for direction in self.__create_directions_one:  # Check adjacent cells randomly
                             tx, ty = direction(x, y)
-                            if self.__check_indices(tx, ty) and self.maze[tx, ty, 0] == 255:
+                            if self.__check_indices(tx, ty) and self.maze[tx, ty, 0] == 255:  # Check if cell is visited
                                 return tx, ty, hunt_list  # Return visited neighbour of unvisited cell
                 if finished:
                     hunt_list.remove(x)  # Remove finished row
+                    break  # Restart loop
 
         return None, None, None  # Return stop values if all rows are finished
 
     def __create_hunt_and_kill(self):
         """Creates maze with hunt and kill algorithm"""
+        hunt_list = list(range(1, self.__row_count_with_walls - 1, 2))  # List of unfinished rows [x, ...]
+
         x = 2 * random.randint(0, self.__row_count_without_walls - 1) + 1
         y = 2 * random.randint(0, self.__col_count_without_walls - 1) + 1
         self.maze[x, y] = [255, 255, 255]
-
-        hunt_list = list(range(1, self.__row_count_with_walls - 1, 2))  # List of unfinished rows [x, ...]
 
         while x:
             walking = True
@@ -374,7 +375,6 @@ class Maze:
 
         self.__set_counts()
 
-        # Define values for start and end
         if start == 0:
             start = (0, 0)
         if end == 0:
@@ -392,51 +392,42 @@ class Maze:
         start = tuple([2 * x + 1 for x in start])
         end = tuple([2 * x + 1 for x in end])
 
-        # Copy maze
         self.solution = self.maze.copy()
 
-        # Find solution
-        if algorithm == Algorithm.Solve.BACKTRACKING:
-            self.__solve_recursive_backtracking(start, end)
+        if algorithm == Algorithm.Solve.DEPTH:
+            self.__solve_depth_first_search(start, end)
         else:
             raise Exception("Wrong algorithm\n"
                             "Use \"Algorithm.Solve.<algorithm>\" to choose an algorithm")
 
     def __solve_walk(self, x, y, stack, visited_cells):
         """Walks over maze"""
-        changed = False
-        random.shuffle(self.__directions_two)
-        for direction in self.__directions_two:
+        for direction in self.__directions_two:  # Check adjacent cells
             tx, ty, bx, by = direction(x, y)
             if visited_cells[bx, by, 0] == 255:  # Check if cell is unvisited
-                changed = True
-                break
+                visited_cells[bx, by, 0] = visited_cells[tx, ty, 0] = 0  # Mark cells as visited
+                stack.extend([(bx, by), (tx, ty)])
+                return tx, ty, stack, visited_cells, True  # Return new cell and continue walking
 
-        if changed:
-            visited_cells[bx, by, 0] = visited_cells[tx, ty, 0] = 0  # Mark visited cells
-
-            stack.extend([(bx, by), (tx, ty)])
-
-            return tx, ty, stack, visited_cells, True
-        else:
-            return x, y, stack, visited_cells, False
+        return x, y, stack, visited_cells, False  # Return old cell and stop walking
 
     def __solve_backtrack(self, stack, visited_cells):
         """Backtracks stacks"""
-        while True:
+        while stack:
             x, y = stack.pop()
-            for direction in self.__solve_directions_one:
+            for direction in self.__solve_directions_one:  # Check adjacent cells
                 tx, ty = direction(x, y)
-                if visited_cells[tx, ty, 0] == 255:  # Check if cell is unvisited
+                if visited_cells[tx, ty, 0] == 255:  # Check if cell is visited
                     stack.append((x, y))
-                    return x, y, stack
+                    return x, y, stack  # Return cell with unvisited neighbour
 
-    def __solve_recursive_backtracking(self, start, end):
-        """Solves maze with recursive backtracking algorithm"""
-        visited_cells = self.maze.copy()  # List of visited cells, value of visited cell is [0, ?, ?]
-        stack = list()  # List of current path
+        return None, None, None  # Algorithm will fail if the maze has no solution
 
-        # Define start
+    def __solve_depth_first_search(self, start, end):
+        """Solves maze with depth-first search"""
+        visited_cells = self.maze.copy()  # 2D list of visited cells, value of visited cell is [0, ?, ?]
+        stack = list()  # List of visited cells [(x, y), ...]
+
         x, y = start
         stack.append((x, y))
         visited_cells[x, y, 0] = 0
@@ -445,15 +436,14 @@ class Maze:
             walking = True
             while walking:
                 x, y, stack, visited_cells, walking = self.__solve_walk(x, y, stack, visited_cells)
-                if (x, y) == end:  # Stop if end is reached
+                if (x, y) == end:  # Stop if end has been found
+                    r, g, b = 255, 0, 0
                     offset = 255 / len(stack)
-                    r = 255
-                    b = 0
                     while stack:  # Color path
                         r -= offset
                         b += offset
                         x, y = stack.pop()
-                        self.solution[x, y] = [r, 0, b]
+                        self.solution[x, y] = [r, g, b]
                     return
             x, y, stack = self.__solve_backtrack(stack, visited_cells)
 
@@ -565,7 +555,8 @@ class Maze:
         col_count = len(maze[0])
         scaled_maze = np.zeros((factor * row_count, factor * col_count, 3), dtype=np.uint8)
 
-        for x in range(0, row_count):  # Assign values to upscaled maze
+        # Assign values to upscaled maze
+        for x in range(0, row_count):
             for y in range(0, col_count):
                 for i in range(0, factor):
                     for j in range(0, factor):
@@ -581,7 +572,7 @@ class Maze:
 
         factor = 0
         stop = False
-        for x in range(1, row_count):  # Find out factor
+        for x in range(1, row_count):
             for y in range(1, col_count):
                 if maze[x, y, 0] != 0:
                     stop = True
@@ -596,7 +587,8 @@ class Maze:
         col_count = col_count // factor
         scaled_maze = np.zeros((row_count, col_count, 3), dtype=np.uint8)
 
-        for x in range(0, row_count):  # Assign values to downscaled maze
+        # Assign values to downscaled maze
+        for x in range(0, row_count):
             for y in range(0, col_count):
                 scaled_maze[x, y] = maze[x * factor, y * factor]
 
