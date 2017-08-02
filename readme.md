@@ -1,5 +1,5 @@
 # maze
-Maze creation and solving in Python.
+Create and solve mazes in Python.
 
 ## How to use
 ```python
@@ -15,9 +15,19 @@ The code above creates the following pictures:
 
 ![maze.png](https://raw.githubusercontent.com/jsmolka/maze/master/example/maze.png) ![solution.png](https://raw.githubusercontent.com/jsmolka/maze/master/example/solution.png)
 
-You can choose between different algorithms to create and solve a maze. Currently there are 6 algorithms for creating and 1 algorithm for solving.
-
 If you want to run the visual examples in the visual directory, you have to install [pyprocessing](https://github.com/jsmolka/pyprocessing).
+
+## Algorithms
+### Creating
+- Recursive backtracking algorithm
+- Hunt and kill algorithm
+- Eller's algorithm
+- Sidewinder algorithm
+- Prim's algorithm
+- Kruskal's algorithm
+
+### Solving
+- Depth-first search
 
 ## Requirements
 - NumPy
