@@ -159,7 +159,7 @@ class Maze:
         y = 2 * random.randint(0, self.__col_count_without_walls - 1) + 1
         self.maze[x, y] = [255, 255, 255]
 
-        while x:
+        while hunt_list:
             walking = True
             while walking:
                 x, y, walking = self.__create_walk(x, y)
@@ -167,58 +167,56 @@ class Maze:
 
     def __create_eller(self):
         """Creates maze with Eller's algorithm"""
-        row_stack = [0] * self.__col_count_without_walls  # Stack with predefined length
-        set_list = []  # List of tuples [(set_index, position)]
+        row_stack = [0] * self.__col_count_without_walls  # List of indices [set index, ...]
+        set_list = []  # List of tuples [(set index, position), ...]
         set_index = 1
 
         for x in range(1, self.__row_count_with_walls - 1, 2):
-            connect_list = []  # Order of connected cells
+            connect_list = []  # List of boolean values [True, ...]
 
             # Create row stack
-            for y in range(0, self.__col_count_without_walls):
-                if y == 0:  # Define first cell
+            if row_stack[0] == 0:  # Define first cell in row
+                row_stack[0] = set_index
+                set_index += 1
+
+            for y in range(1, self.__col_count_without_walls):
+                if bool(random.getrandbits(1)):  # Connect cell with previous cell
+                    if row_stack[y] != 0:  # Cell has a set
+                        old_index = row_stack[y]
+                        new_index = row_stack[y - 1]
+                        if old_index != new_index:  # Combine both sets
+                            row_stack = [new_index if y == old_index else y for y in row_stack]  # Replace old indices
+                            connect_list.append(True)
+                        else:
+                            connect_list.append(False)
+                    else:  # Cell has no set
+                        row_stack[y] = row_stack[y - 1]
+                        connect_list.append(True)
+                else:  # Do not connect cell with previous cell
                     if row_stack[y] == 0:
                         row_stack[y] = set_index
                         set_index += 1
-                else:
-                    if bool(random.getrandbits(1)):  # Connect cells
-                        if row_stack[y] != 0:  # Has link to other set
-                            old_index = row_stack[y]
-                            new_index = row_stack[y - 1]
-                            if old_index != new_index:
-                                row_stack = [new_index if y == old_index else y for y in row_stack]  # Replace old index
-                                connect_list.append(True)
-                            else:
-                                connect_list.append(False)
-                        else:  # Has no link to other set
-                            row_stack[y] = row_stack[y - 1]
-                            connect_list.append(True)
-
-                    else:  # Do not connect cells
-                        if row_stack[y] == 0:
-                            row_stack[y] = set_index
-                            set_index += 1
-                        connect_list.append(False)
+                    connect_list.append(False)
 
             # Create set list and fill cells
-            for y in range(0, self.__col_count_without_walls):
+            for y in range(1, self.__col_count_without_walls):
                 maze_col = 2 * y + 1
                 set_list.append((row_stack[y], maze_col))
 
-                self.maze[x, maze_col] = [255, 255, 255]
+                self.maze[x, maze_col] = [255, 255, 255]  # Mark cell as visited
                 if y < self.__col_count_without_walls - 1:
                     if connect_list[y]:
-                        self.maze[x, maze_col + 1] = [255, 255, 255]
+                        self.maze[x, maze_col + 1] = [255, 255, 255]  # Mark cell as visited
 
-            if x == self.__row_count_with_walls - 2:  # Connect last row
+            if x == self.__row_count_with_walls - 2:  # Connect all different sets in last row
                 for y in range(1, self.__col_count_without_walls):
                     maze_col = 2 * y + 1
                     new_index = row_stack[y - 1]
                     old_index = row_stack[y]
                     if new_index != old_index:
-                        row_stack = [new_index if y == old_index else y for y in row_stack]  # Replace old index
-                        self.maze[x, maze_col - 1] = [255, 255, 255]
-                break  # End main loop with last row
+                        row_stack = [new_index if y == old_index else y for y in row_stack]  # Replace old indices
+                        self.maze[x, maze_col - 1] = [255, 255, 255]  # Mark cell as visited
+                break  # End loop with last row
 
             # Reset row stack
             row_stack = [0] * self.__col_count_without_walls
@@ -226,25 +224,25 @@ class Maze:
             # Create vertical links
             set_list.sort()
             while set_list:
-                sub_set_list = []  # List of same set indices
+                sub_set_list = []  # List of tuples for one set index [(set index, position), ...]
                 sub_set_index = set_list[0][0]
                 while set_list and set_list[0][0] == sub_set_index:  # Create sub list for one set index
-                    sub_set_list.append(set_list.pop(0))  # Pop first item
-                while True:
+                    sub_set_list.append(set_list.pop(0))
+                while True:  # Create at least one link for each set index
                     can_break = False
-                    link_list = []  # Contains links [(set_index, column)]
+                    link_list = []  # List of links [(set index, column), ...]
                     for sub_set_item in sub_set_list:
                         if bool(random.getrandbits(1)):  # Create link
                             link_list.append(sub_set_item)
                             can_break = True
                     if can_break:
                         break
-                for link in link_list:  # Create link
+                for link in link_list:  # Create links
                     link_set, link_position = link
                     link_stack_position = (link_position - 1) // 2
 
                     row_stack[link_stack_position] = link_set  # Assign links to new row stack
-                    self.maze[x + 1, link_position] = [255, 255, 255]  # Color link
+                    self.maze[x + 1, link_position] = [255, 255, 255]  # Mark link cell as visited
 
     def __create_sidewinder(self):
         """Creates maze with sidewinder algorithm"""
@@ -417,11 +415,11 @@ class Maze:
             x, y = stack.pop()
             for direction in self.__solve_directions_one:  # Check adjacent cells
                 tx, ty = direction(x, y)
-                if visited_cells[tx, ty, 0] == 255:  # Check if cell is visited
+                if visited_cells[tx, ty, 0] == 255:  # Check if cell is unvisited
                     stack.append((x, y))
                     return x, y, stack  # Return cell with unvisited neighbour
 
-        return None, None, None  # Algorithm will fail if the maze has no solution
+        return None, None, None  # Return stop values if stack is empty and no new cell was found
 
     def __solve_depth_first_search(self, start, end):
         """Solves maze with depth-first search"""
@@ -432,7 +430,7 @@ class Maze:
         stack.append((x, y))
         visited_cells[x, y, 0] = 0
 
-        while True:
+        while x:
             walking = True
             while walking:
                 x, y, stack, visited_cells, walking = self.__solve_walk(x, y, stack, visited_cells)
@@ -446,6 +444,8 @@ class Maze:
                         self.solution[x, y] = [r, g, b]
                     return
             x, y, stack = self.__solve_backtrack(stack, visited_cells)
+
+        raise Exception("No solution found")
 
     def __set_counts(self):
         """Sets row and column counts"""
