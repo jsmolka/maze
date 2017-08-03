@@ -167,12 +167,12 @@ class Maze:
 
     def __create_eller(self):
         """Creates maze with Eller's algorithm"""
-        row_stack = [0] * self.__col_count_without_walls  # List of indices [set index, ...]
-        set_list = []  # List of tuples [(set index, position), ...]
+        row_stack = [0] * self.__col_count_without_walls  # List of set indices [set index, ...]
+        set_list = []  # List of set indices with positions [(set index, position), ...]
         set_index = 1
 
         for x in range(1, self.__row_count_with_walls - 1, 2):
-            connect_list = []  # List of boolean values [True, ...]
+            connect_list = []  # List of connections between cells [True, ...]
 
             # Create row stack
             if row_stack[0] == 0:  # Define first cell in row
@@ -224,7 +224,7 @@ class Maze:
             # Create vertical links
             set_list.sort()
             while set_list:
-                sub_set_list = []  # List of tuples for one set index [(set index, position), ...]
+                sub_set_list = []  # List of set indices with positions for one set index [(set index, position), ...]
                 sub_set_index = set_list[0][0]
                 while set_list and set_list[0][0] == sub_set_index:  # Create sub list for one set index
                     sub_set_list.append(set_list.pop(0))
@@ -239,7 +239,7 @@ class Maze:
                         break
                 for link in link_list:  # Create links
                     link_set, link_position = link
-                    link_stack_position = (link_position - 1) // 2
+                    link_stack_position = link_position // 2
 
                     row_stack[link_stack_position] = link_set  # Assign links to new row stack
                     self.maze[x + 1, link_position] = [255, 255, 255]  # Mark link cell as visited
@@ -252,7 +252,7 @@ class Maze:
 
         # Create other rows
         for x in range(3, self.__row_count_with_walls, 2):
-            row_stack = []
+            row_stack = []  # List of cells without vertical link [y, ...]
             for y in range(1, self.__col_count_with_walls, 2):
                 self.maze[x, y] = [255, 255, 255]
                 row_stack.append(y)
@@ -261,10 +261,10 @@ class Maze:
                     if bool(random.getrandbits(1)):  # Create vertical link
                         index = random.randint(0, len(row_stack) - 1)
                         self.maze[x - 1, row_stack[index]] = [255, 255, 255]
-                        row_stack = []
+                        row_stack = []  # Reset row stack
                     else:  # Create horizontal link
                         self.maze[x, y + 1] = [255, 255, 255]
-                else:  # Create link if last cell
+                else:  # Create vertical link if last cell
                     index = random.randint(0, len(row_stack) - 1)
                     self.maze[x - 1, row_stack[index]] = [255, 255, 255]
 
