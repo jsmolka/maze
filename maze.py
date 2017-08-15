@@ -277,16 +277,16 @@ class Maze:
         y = 2 * random.randint(0, self.__col_count_without_walls - 1) + 1
         self.maze[x, y] = [255, 255, 255]
 
-        for direction in self.__create_directions_one:  # Add cells to frontier for random x and y
+        # Add cells to frontier for random cell
+        for direction in self.__create_directions_one:
             tx, ty = direction(x, y)
             if self.__check_indices(tx, ty):
                 frontier.append((tx, ty))
+                self.maze[tx, ty] = [1, 1, 1]  # Mark cell as part of frontier
 
         # Add and connect cells until frontier is empty
         while frontier:
-            index = random.randint(0, len(frontier) - 1)
-            x, y = frontier[index]
-            del frontier[index]
+            x, y = frontier.pop(random.randint(0, len(frontier) - 1))
 
             # Connect cells
             random.shuffle(self.__directions_two)
@@ -301,8 +301,9 @@ class Maze:
             for direction in self.__create_directions_one:
                 tx, ty = direction(x, y)
                 if self.__check_indices(tx, ty):
-                    if (tx, ty) not in frontier and self.maze[tx, ty, 0] == 0:  # Not in frontier and unvisited
+                    if self.maze[tx, ty, 0] == 0:  # Check if cell is unvisited
                         frontier.append((tx, ty))
+                        self.maze[tx, ty] = [1, 1, 1]  # Mark cell as part of frontier
 
     def __create_kruskal(self):
         """Creates maze with Kruskal's algorithm"""
