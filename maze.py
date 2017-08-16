@@ -308,7 +308,7 @@ class Maze:
     def __create_kruskal(self):
         """Creates maze with Kruskal's algorithm"""
         xy_to_set = np.zeros((self.__row_count_with_walls, self.__col_count_with_walls), dtype=np.uint64)
-        set_to_xy = []
+        set_to_xy = []  # List of sets in order, set 0 at index 0 [[(x, y),...], ...]
         edges = []  # All possible edges
 
         # Assign sets
@@ -334,37 +334,36 @@ class Maze:
             if direction:  # Vertical edge
                 x1 = x - 1
                 x2 = x + 1
+
                 if xy_to_set[x1, y] != xy_to_set[x2, y]:  # Check if cells are in different sets
                     self.maze[x, y] = self.maze[x1, y] = self.maze[x2, y] = [255, 255, 255]
 
                     new_set = xy_to_set[x1, y]
                     old_set = xy_to_set[x2, y]
 
-                    # Transfer sets from old to new set
-                    for pos in set_to_xy[old_set]:
-                        set_to_xy[new_set].append(pos)
+                    # Extend new set with old set
+                    set_to_xy[new_set].extend(set_to_xy[old_set])
 
                     # Correct sets in xy sets
                     for pos in set_to_xy[new_set]:
-                        x, y = pos
-                        xy_to_set[x, y] = new_set
+                        xy_to_set[pos] = new_set
 
             else:  # Horizontal edge
                 y1 = y - 1
                 y2 = y + 1
+
                 if xy_to_set[x, y1] != xy_to_set[x, y2]:  # Check if cells are in different sets
                     self.maze[x, y] = self.maze[x, y1] = self.maze[x, y2] = [255, 255, 255]
 
                     new_set = xy_to_set[x, y1]
                     old_set = xy_to_set[x, y2]
 
-                    # Transfer sets from old to new set
-                    for pos in set_to_xy[old_set]:
-                        set_to_xy[new_set].append(pos)
+                    # Extend new set with old set
+                    set_to_xy[new_set].extend(set_to_xy[old_set])
 
                     # Correct sets in xy sets
                     for pos in set_to_xy[new_set]:
-                        xy_to_set[pos[0], pos[1]] = new_set
+                        xy_to_set[pos] = new_set
 
     def solve(self, start, end, algorithm):
         """Solves maze"""
