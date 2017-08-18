@@ -93,8 +93,8 @@ class Maze:
     def __shuffled(l):
         """Returns shuffled list"""
         result = l[:]
-    	shuffle(result)
-    	return result
+        shuffle(result)
+        return result
 
     def __out_of_bounds(self, x, y):
         """Checks if indices are out of bounds"""
@@ -339,7 +339,6 @@ class Maze:
         edges = []  # All possible edges
         set_index = 0
 
-
         for x in range(1, self.row_count_with_walls - 1, 2):
             for y in range(1, self.col_count_with_walls - 1, 2):
                 # Assign sets
@@ -484,9 +483,9 @@ class Maze:
 
         with open(file_name, "w") as outfile:
             if fancy:
-                json.dump(self.maze.tolist(), outfile, indent=4)
+                dump(self.maze.tolist(), outfile, indent=4)
             else:
-                json.dump(self.maze.tolist(), outfile)
+                dump(self.maze.tolist(), outfile)
 
     def save_solution_as_png(self, file_name="solution.png", upscale_factor=3):
         """Saves solution as png"""
@@ -505,9 +504,9 @@ class Maze:
 
         with open(file_name, "w") as outfile:
             if fancy:
-                json.dump(self.solution.tolist(), outfile, indent=4)
+                dump(self.solution.tolist(), outfile, indent=4)
             else:
-                json.dump(self.solution.tolist(), outfile)
+                dump(self.solution.tolist(), outfile)
 
     def load_maze_from_png(self, file_name="maze.png"):
         """Loads maze from png"""
@@ -523,7 +522,7 @@ class Maze:
             raise Exception("{0} does not exist".format(file_name))
 
         with open(file_name) as data_file:
-            self.maze = np.array(json.load(data_file))
+            self.maze = np.array(load(data_file))
 
     def load_solution_from_png(self, file_name="solution.png"):
         """Loads solution from png"""
@@ -533,15 +532,13 @@ class Maze:
         image = Image.open(file_name)
         self.solution = Maze.__downscale(np.array(image))
 
-        self.__set_counts()
-
     def load_solution_from_json(self, file_name="solution.json"):
         """Loads solution from json"""
         if not isfile(file_name):
             raise Exception("{0} does not exist".format(file_name))
 
         with open(file_name) as data_file:
-            self.solution = np.array(json.load(data_file))
+            self.solution = np.array(load(data_file))
 
     @staticmethod
     def __upscale(maze, factor):
