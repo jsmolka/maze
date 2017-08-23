@@ -336,7 +336,7 @@ class Maze:
         """Creates maze with Kruskal's algorithm"""
         xy_to_set = np.zeros((self.row_count_with_walls, self.col_count_with_walls), dtype=np.uint32)
         set_to_xy = []  # List of sets in order, set 0 at index 0 [[(x, y),...], ...]
-        edges = []  # All possible edges
+        edges = []  # List of possible edges [(x, y, direction), ...]
         set_index = 0
 
         for x in range(1, self.row_count_with_walls - 1, 2):
@@ -356,37 +356,21 @@ class Maze:
         while edges:
             x, y, direction = edges.pop()
 
-            if direction == "v":  # Vertical edge
-                x1 = x - 1
-                x2 = x + 1
-                if xy_to_set[x1, y] != xy_to_set[x2, y]:  # Check if cells are in different sets
-                    self.maze[x, y] = self.maze[x1, y] = self.maze[x2, y] = [255, 255, 255]  # Mark as visited
+            x1, x2 = (x - 1, x + 1) if direction == "v" else (x, x)
+            y1, y2 = (y - 1, y + 1) if direction == "h" else (y, y)
 
-                    new_set = xy_to_set[x1, y]
-                    old_set = xy_to_set[x2, y]
+            if xy_to_set[x1, y1] != xy_to_set[x2, y2]:  # Check if cells are in different sets
+                self.maze[x, y] = self.maze[x1, y1] = self.maze[x2, y2] = [255, 255, 255]  # Mark as visited
 
-                    # Extend new set with old set
-                    set_to_xy[new_set].extend(set_to_xy[old_set])
+                new_set = xy_to_set[x1, y1]
+                old_set = xy_to_set[x2, y2]
 
-                    # Correct sets in xy sets
-                    for pos in set_to_xy[new_set]:
-                        xy_to_set[pos] = new_set
+                # Extend new set with old set
+                set_to_xy[new_set].extend(set_to_xy[old_set])
 
-            else:  # Horizontal edge
-                y1 = y - 1
-                y2 = y + 1
-                if xy_to_set[x, y1] != xy_to_set[x, y2]:  # Check if cells are in different sets
-                    self.maze[x, y] = self.maze[x, y1] = self.maze[x, y2] = [255, 255, 255]  # Mark as visited
-
-                    new_set = xy_to_set[x, y1]
-                    old_set = xy_to_set[x, y2]
-
-                    # Extend new set with old set
-                    set_to_xy[new_set].extend(set_to_xy[old_set])
-
-                    # Correct sets in xy sets
-                    for pos in set_to_xy[new_set]:
-                        xy_to_set[pos] = new_set
+                # Correct sets in xy sets
+                for pos in set_to_xy[old_set]:
+                    xy_to_set[pos] = new_set
 
     def solve(self, start, end, algorithm):
         """Solves maze"""
@@ -475,17 +459,15 @@ class Maze:
         img = Image.fromarray(Maze.__upscale(self.maze, upscale_factor), "RGB")
         img.save(file_name, "png")
 
-    def save_maze_as_json(self, file_name="maze.json", fancy=False):
+    def save_maze_as_json(self, file_name="maze.json", indent=0):
         """Saves maze as json"""
         if self.maze is None:
             raise Exception("Maze is not assigned\n"
                             "Use \"create\" or \"load_maze\" method to create or load a maze")
 
         with open(file_name, "w") as outfile:
-            if fancy:
-                dump(self.maze.tolist(), outfile, indent=4)
-            else:
-                dump(self.maze.tolist(), outfile)
+            dump(self.maze.tolist(), outfile) if indent == 0 else dump(self.maze.tolist(), outfile, indent=indent)
+
 
     def save_solution_as_png(self, file_name="solution.png", upscale_factor=3):
         """Saves solution as png"""
@@ -496,17 +478,14 @@ class Maze:
         img = Image.fromarray(Maze.__upscale(self.solution, upscale_factor), "RGB")
         img.save(file_name, "png")
 
-    def save_solution_as_json(self, file_name="solution.json", fancy=False):
+    def save_solution_as_json(self, file_name="solution.json", indent=0):
         """Saves solution as json"""
         if self.solution is None:
             raise Exception("Solution is not assigned\n"
                             "Use \"solve\" method to solve a maze")
 
         with open(file_name, "w") as outfile:
-            if fancy:
-                dump(self.solution.tolist(), outfile, indent=4)
-            else:
-                dump(self.solution.tolist(), outfile)
+            dump(self.solution.tolist(), outfile) if indent == 0 else dump(self.solution.tolist(), outfile, indent=indent)
 
     def load_maze_from_png(self, file_name="maze.png"):
         """Loads maze from png"""
