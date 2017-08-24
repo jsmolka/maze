@@ -1,6 +1,6 @@
 import numpy as np
-import random
 from pyprocessing import *
+from random import shuffle
 
 # Configuration
 row_count = 35
@@ -11,118 +11,95 @@ scale = 8
 row_count_with_walls = 2 * row_count + 1
 col_count_with_walls = 2 * col_count + 1
 maze = np.zeros((row_count_with_walls, col_count_with_walls, 3), dtype=np.uint8)
-xy_to_set = np.zeros((row_count_with_walls, col_count_with_walls), dtype=np.uint64)  # x, y to set
-set_to_xy = []  # Set to x, y
-edges = []  # All possible edges
+xy_to_set = np.zeros((row_count_with_walls, col_count_with_walls), dtype=np.uint32)
+set_to_xy = []  # List of sets in order, set 0 at index 0 [[(x, y),...], ...]
+edges = []  # List of possible edges [(x, y, direction), ...]
 
-last_edge = list()  # List of tuples
-current_edge = list()  # List of tuples
+last_edge = []  # List of cells [(x, y), ...]
+current_edge = []  # List of cells [(x, y), ...]
 finished = False
 
-# Assign sets
+
+def out_of_bounds(x, y):
+    """Checks if indices are out of bounds"""
+    global row_count_with_walls, col_count_with_walls
+    return True if x < 0 or y < 0 or x >= row_count_with_walls or y >= col_count_with_walls else False
+
+
 set_index = 0
-for i in range(1, row_count_with_walls - 1, 2):
-    for j in range(1, col_count_with_walls - 1, 2):
-        xy_to_set[i, j] = set_index
-        set_to_xy.append([(i, j)])
+for x in range(1, row_count_with_walls - 1, 2):
+    for y in range(1, col_count_with_walls - 1, 2):
+        # Assign sets
+        xy_to_set[x, y] = set_index
+        set_to_xy.append([(x, y)])
         set_index += 1
 
-# Create edges
-for i in range(2, row_count_with_walls - 1, 2):  # Vertical edges
-    for j in range(1, col_count_with_walls - 1, 2):
-        edges.append((i, j, True))  # True == vertical
-for i in range(1, row_count_with_walls - 1, 2):  # Horizontal edges
-    for j in range(2, col_count_with_walls - 1, 2):
-        edges.append((i, j, False))  # False == horizontal
+        # Create edges
+        if not out_of_bounds(x + 2, y):
+            edges.append((x + 1, y, "v"))  # Vertical edge
+        if not out_of_bounds(x, y + 2):
+            edges.append((x, y + 1, "h"))  # Horizontal edge
 
-random.shuffle(edges)
+shuffle(edges)
 
 
 def choose_edge():
     """Chooses edge to be drawn"""
-    global edges, xy_to_set, set_to_xy, current_edge, finished
-    edge_chosen = False
-    while not edge_chosen:
-        x, y, direction = edges.pop()  # Get random edge
+    global maze, edges, xy_to_set, set_to_xy, finished, current_edge
+    chosen = False
+    while not chosen:
+        x, y, direction = edges.pop()
 
-        if direction:  # Vertical edge
-            x1 = x - 1
-            x2 = x + 1
-            if xy_to_set[x1, y] != xy_to_set[x2, y]:  # Check if cells are in different sets
-                current_edge = [(x, y), (x1, y), (x2, y)]
+        x1, x2 = (x - 1, x + 1) if direction == "v" else (x, x)
+        y1, y2 = (y - 1, y + 1) if direction == "h" else (y, y)
 
-                # New and old set
-                new_set = xy_to_set[x1, y]
-                old_set = xy_to_set[x2, y]
+        if xy_to_set[x1, y1] != xy_to_set[x2, y2]:  # Check if cells are in different sets
+            maze[x, y] = maze[x1, y1] = maze[x2, y2] = [255, 255, 255]  # Mark as visited
+            current_edge = [(x, y), (x1, y1), (x2, y2)]
+            chosen = True
 
-                # Transfer sets from old to new set
-                for pos in set_to_xy[old_set]:
-                    set_to_xy[new_set].append(pos)
-                set_to_xy[old_set] = []  # Empty old set
+            new_set = xy_to_set[x1, y1]
+            old_set = xy_to_set[x2, y2]
 
-                # Correct sets in xy sets
-                for pos in set_to_xy[new_set]:
-                    x, y = pos
-                    xy_to_set[x, y] = new_set
+            # Extend new set with old set
+            set_to_xy[new_set].extend(set_to_xy[old_set])
 
-                edge_chosen = True
+            # Correct sets in xy sets
+            for pos in set_to_xy[old_set]:
+                xy_to_set[pos] = new_set
 
-        else:  # Horizontal edge
-            y1 = y - 1
-            y2 = y + 1
-            if xy_to_set[x, y1] != xy_to_set[x, y2]:  # Check if cells are in different sets
-                current_edge = [(x, y), (x, y1), (x, y2)]
-
-                # New and old set
-                new_set = xy_to_set[x, y1]
-                old_set = xy_to_set[x, y2]
-
-                # Transfer sets from old to new set
-                for pos in set_to_xy[old_set]:
-                    set_to_xy[new_set].append(pos)
-                set_to_xy[old_set] = []  # Empty old set
-
-                # Correct sets in xy sets
-                for pos in set_to_xy[new_set]:
-                    x, y = pos
-                    xy_to_set[x, y] = new_set
-
-                edge_chosen = True
-
-        if not edges:  # End program is all edges are used
+        if not edges:  # End if all edges are used
             finished = True
             break
 
 
 def draw_edge():
     """Draws edge"""
-    # Swapped x and y because outcome was weird
-    global current_edge, last_edge
+    global finished, current_edge, last_edge
     for x, y in current_edge:
         fill(0, 255, 0)
         rect(y * scale, x * scale, scale, scale)
     for x, y in last_edge:
         fill(255)
         rect(y * scale, x * scale, scale, scale)
-    last_edge = current_edge
     if finished:
-        for x, y in last_edge:
+        for x, y in current_edge:
             fill(255)
             rect(y * scale, x * scale, scale, scale)
+        noLoop()
+    current_edge, last_edge = [], current_edge
 
 
 def setup():
-    size(col_count_with_walls * scale, row_count_with_walls * scale)
+    global row_count_with_walls, col_count_with_walls
+    size(col_count_with_walls * scale, row_count_with_walls * scale, caption="Kruskal's algorithm")
     background(0)
+    noStroke()
 
 
 def draw():
-    noStroke()
-    if not finished:
-        choose_edge()
-        draw_edge()
-    else:
-        noLoop()
+    choose_edge()
+    draw_edge()
 
 
 run()
