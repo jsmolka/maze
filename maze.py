@@ -130,7 +130,6 @@ class Maze:
             if not self.__out_of_bounds(tx, ty) and self.maze[tx, ty, 0] == 0:  # Check if unvisited
                 self.maze[tx, ty] = self.maze[bx, by] = [255, 255, 255]  # Mark as visited
                 return tx, ty, True  # Return new cell and continue walking
-
         return x, y, False  # Return old cell and stop walking
 
     def __c_backtrack(self, stack):
@@ -141,12 +140,11 @@ class Maze:
                 tx, ty = direction(x, y)
                 if not self.__out_of_bounds(tx, ty) and self.maze[tx, ty, 0] == 0:  # Check if unvisited
                     return x, y, stack  # Return cell with unvisited neighbour
-
         return None, None, None  # Return stop values if stack is empty
 
     def __c_recursive_backtracking(self):
         """Creates maze with recursive backtracking algorithm"""
-        stack = list()  # List of visited cells [(x, y), ...]
+        stack = []  # List of visited cells [(x, y), ...]
 
         x = 2 * randint(0, self.row_count - 1) + 1
         y = 2 * randint(0, self.col_count - 1) + 1
@@ -174,7 +172,6 @@ class Maze:
                 if finished:
                     hunt_list.remove(x)  # Remove finished row
                     break  # Restart loop
-
         return None, None, None  # Return stop values if all rows are finished
 
     def __c_hunt_and_kill(self):
@@ -247,27 +244,21 @@ class Maze:
             row_stack = [0] * self.col_count
 
             # Create vertical links
-            set_list.sort()
+            set_list.sort(reverse=True)
             while set_list:
                 sub_set_list = []  # List of set indices with positions for one set index [(set index, position), ...]
                 sub_set_index = set_list[0][0]
                 while set_list and set_list[0][0] == sub_set_index:  # Create sub list for one set index
-                    sub_set_list.append(set_list.pop(0))
-                while True:  # Create at least one link for each set index
-                    can_break = False
-                    link_list = []  # List of links [(set index, column), ...]
+                    sub_set_list.append(set_list.pop())
+                linked = False
+                while not linked:  # Create at least one link for each set index
                     for sub_set_item in sub_set_list:
                         if bool(getrandbits(1)):  # Create link
-                            link_list.append(sub_set_item)
-                            can_break = True
-                    if can_break:
-                        break
-                for link in link_list:  # Create links
-                    link_set, link_position = link
-                    link_stack_position = link_position // 2
+                            linked = True
+                            link_set, link_position = sub_set_item
 
-                    row_stack[link_stack_position] = link_set  # Assign links to new row stack
-                    self.maze[x + 1, link_position] = [255, 255, 255]  # Mark link as visited
+                            row_stack[link_position // 2] = link_set  # Assign links to new row stack
+                            self.maze[x + 1, link_position] = [255, 255, 255]  # Mark link as visited
 
     def __c_sidewinder(self):
         """Creates maze with sidewinder algorithm"""
@@ -289,7 +280,7 @@ class Maze:
                 else:  # Create horizontal link
                     self.maze[x, y + 1] = [255, 255, 255]  # Mark as visited
 
-            # Create vertical link for last cell
+            # Create vertical link if last cell
             y = self.col_count_with_walls - 2
             self.maze[x, y] = [255, 255, 255]  # Mark as visited
             row_stack.append(y)
@@ -298,7 +289,7 @@ class Maze:
 
     def __c_prim(self):
         """Creates maze with Prim's algorithm"""
-        frontier = list()  # List of unvisited cells [(x, y),...]
+        frontier = []  # List of unvisited cells [(x, y),...]
 
         # Start with random cell
         x = 2 * randint(0, self.row_count - 1) + 1
@@ -319,18 +310,16 @@ class Maze:
             # Connect cells
             for direction in Maze.__shuffled(self.__dir_two):
                 tx, ty, bx, by = direction(x, y)
-                if not self.__out_of_bounds(tx, ty):
-                    if self.maze[tx, ty, 0] == 255:  # Check if visited
-                        self.maze[x, y] = self.maze[bx, by] = [255, 255, 255]  # Connect cells
-                        break
+                if not self.__out_of_bounds(tx, ty) and self.maze[tx, ty, 0] == 255:  # Check if visited
+                    self.maze[x, y] = self.maze[bx, by] = [255, 255, 255]  # Connect cells
+                    break
 
             # Add cells to frontier
             for direction in self.__c_dir_one:
                 tx, ty = direction(x, y)
-                if not self.__out_of_bounds(tx, ty):
-                    if self.maze[tx, ty, 0] == 0:  # Check if unvisited
-                        frontier.append((tx, ty))
-                        self.maze[tx, ty] = [1, 1, 1]  # Mark as part of frontier
+                if not self.__out_of_bounds(tx, ty) and self.maze[tx, ty, 0] == 0:  # Check if unvisited
+                    frontier.append((tx, ty))
+                    self.maze[tx, ty] = [1, 1, 1]  # Mark as part of frontier
 
     def __c_kruskal(self):
         """Creates maze with Kruskal's algorithm"""
@@ -411,7 +400,6 @@ class Maze:
                 visited_cells[bx, by] = visited_cells[tx, ty] = [0, 0, 0]  # Mark as visited
                 stack.extend([(bx, by), (tx, ty)])
                 return tx, ty, stack, visited_cells, True  # Return new cell and continue walking
-
         return x, y, stack, visited_cells, False  # Return old cell and stop walking
 
     def __s_backtrack(self, stack, visited_cells):
@@ -423,13 +411,12 @@ class Maze:
                 if visited_cells[tx, ty, 0] == 255:  # Check if unvisited
                     stack.append((x, y))
                     return x, y, stack  # Return cell with unvisited neighbour
-
         return None, None, None  # Return stop values if stack is empty and no new cell was found
 
     def __s_depth_first_search(self, start, end):
         """Solves maze with depth-first search"""
         visited_cells = self.maze.copy()  # List of visited cells, value of visited cell is [0, 0, 0]
-        stack = list()  # List of visited cells [(x, y), ...]
+        stack = []  # List of visited cells [(x, y), ...]
 
         x, y = start
         stack.append((x, y))
@@ -466,7 +453,7 @@ class Maze:
                             "Use \"create\" or \"load_maze\" method to create or load a maze")
 
         with open(file_name, "w") as outfile:
-            dump(self.maze.tolist(), outfile) if indent == 0 else dump(self.maze.tolist(), outfile, indent=indent)
+            dump(self.maze.to[], outfile) if indent == 0 else dump(self.maze.to[], outfile, indent=indent)
 
 
     def save_solution_as_png(self, file_name="solution.png", upscale_factor=3):
@@ -485,7 +472,7 @@ class Maze:
                             "Use \"solve\" method to solve a maze")
 
         with open(file_name, "w") as outfile:
-            dump(self.solution.tolist(), outfile) if indent == 0 else dump(self.solution.tolist(), outfile, indent=indent)
+            dump(self.solution.to[], outfile) if indent == 0 else dump(self.solution.to[], outfile, indent=indent)
 
     def load_maze_from_png(self, file_name="maze.png"):
         """Loads maze from png"""
@@ -533,7 +520,6 @@ class Maze:
                 for i in range(0, factor):
                     for j in range(0, factor):
                         scaled_maze[factor * x + i, factor * y + j] = maze[x, y]
-
         return scaled_maze
 
     @staticmethod
@@ -562,5 +548,4 @@ class Maze:
         for x in range(0, row_count):
             for y in range(0, col_count):
                 scaled_maze[x, y] = maze[x * factor, y * factor]
-
         return scaled_maze
