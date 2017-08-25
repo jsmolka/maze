@@ -222,7 +222,7 @@ class Maze:
                     connect_list.append(False)
 
             # Create set list and fill cells
-            for y in range(1, self.col_count):
+            for y in range(0, self.col_count):
                 maze_col = 2 * y + 1
                 set_list.append((row_stack[y], maze_col))
 
@@ -247,8 +247,8 @@ class Maze:
             set_list.sort(reverse=True)
             while set_list:
                 sub_set_list = []  # List of set indices with positions for one set index [(set index, position), ...]
-                sub_set_index = set_list[0][0]
-                while set_list and set_list[0][0] == sub_set_index:  # Create sub list for one set index
+                sub_set_index = set_list[-1][0]
+                while set_list and set_list[-1][0] == sub_set_index:  # Create sub list for one set index
                     sub_set_list.append(set_list.pop())
                 linked = False
                 while not linked:  # Create at least one link for each set index
@@ -453,7 +453,7 @@ class Maze:
                             "Use \"create\" or \"load_maze\" method to create or load a maze")
 
         with open(file_name, "w") as outfile:
-            dump(self.maze.to[], outfile) if indent == 0 else dump(self.maze.to[], outfile, indent=indent)
+            dump(self.maze.tolist(), outfile) if indent == 0 else dump(self.maze.tolist(), outfile, indent=indent)
 
 
     def save_solution_as_png(self, file_name="solution.png", upscale_factor=3):
@@ -472,7 +472,7 @@ class Maze:
                             "Use \"solve\" method to solve a maze")
 
         with open(file_name, "w") as outfile:
-            dump(self.solution.to[], outfile) if indent == 0 else dump(self.solution.to[], outfile, indent=indent)
+            dump(self.solution.tolist(), outfile) if indent == 0 else dump(self.solution.tolist(), outfile, indent=indent)
 
     def load_maze_from_png(self, file_name="maze.png"):
         """Loads maze from png"""
