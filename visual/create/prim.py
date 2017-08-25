@@ -7,7 +7,7 @@ row_count = 35
 col_count = 35
 scale = 8
 
-# Define lists
+# Define variables
 row_count_with_walls = 2 * row_count + 1
 col_count_with_walls = 2 * col_count + 1
 maze = np.zeros((row_count_with_walls, col_count_with_walls, 3), dtype=np.uint8)
@@ -38,7 +38,6 @@ def out_of_bounds(x, y):
     return True if x < 0 or y < 0 or x >= row_count_with_walls or y >= col_count_with_walls else False
 
 
-# Start with random cell
 x = 2 * randint(0, row_count - 1) + 1
 y = 2 * randint(0, col_count - 1) + 1
 maze[x, y] = [255, 255, 255]  # Mark as visited

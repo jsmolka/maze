@@ -7,13 +7,12 @@ row_count = 35
 col_count = 35
 scale = 8
 
-# Define lists
+# Define variables
 row_count_with_walls = 2 * row_count + 1
 col_count_with_walls = 2 * col_count + 1
 maze = np.zeros((row_count_with_walls, col_count_with_walls, 3), dtype=np.uint8)
 stack = []  # List of visited cells [(x, y), ...]
 
-# Random cell
 x = 2 * randint(0, row_count - 1) + 1
 y = 2 * randint(0, col_count - 1) + 1
 maze[x, y] = [255, 255, 255]
@@ -55,7 +54,7 @@ def out_of_bounds(x, y):
 
 def walk():
     """Walks over maze"""
-    global x, y, maze, stack, dir_two, walking, current_cells
+    global x, y, maze, dir_two, walking, current_cells
     for direction in shuffled(dir_two):  # Check adjacent cells randomly
         tx, ty, bx, by = direction(x, y)
         if not out_of_bounds(tx, ty) and maze[tx, ty, 0] == 0:  # Check if unvisited

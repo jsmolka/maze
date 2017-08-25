@@ -7,7 +7,7 @@ row_count = 35
 col_count = 35
 scale = 8
 
-# Define lists
+# Define variables
 row_count_with_walls = 2 * row_count + 1
 col_count_with_walls = 2 * col_count + 1
 maze = np.zeros((row_count_with_walls, col_count_with_walls, 3), dtype=np.uint8)
@@ -60,7 +60,7 @@ def create_cells():
 
     current_cells = [(x, y), link]
 
-    if x == row_count_with_walls and y == col_count_with_walls:  # End condition
+    if x == row_count_with_walls - 2 and y == col_count_with_walls - 2:  # End condition
         finished = True
 
     # Increment parameter

@@ -1,89 +1,85 @@
 import numpy as np
-import random
 from pyprocessing import *
+from random import randint, shuffle
 
 # Configuration
 row_count = 35
 col_count = 35
 scale = 8
 
-# Define lists
+# Define variables
 row_count_with_walls = 2 * row_count + 1
 col_count_with_walls = 2 * col_count + 1
 maze = np.zeros((row_count_with_walls, col_count_with_walls, 3), dtype=np.uint8)
 
-# Random cell
-x = 2 * random.randint(0, row_count - 1) + 1
-y = 2 * random.randint(0, col_count - 1) + 1
+x = 2 * randint(0, row_count - 1) + 1
+y = 2 * randint(0, col_count - 1) + 1
 maze[x, y] = [255, 255, 255]
 
-current_cells = list()  # List of x and y
-last_cells = list()  # List of x and y
+current_cells = []  # List of cells [(x, y), ...]
+last_cells = []  # List of cells [(x, y), ...]
 current_cells.append((x, y))
+
+iteration = 1  # Saves number of current iteration
 last_iteration = 1  # Saves number of last iteration
 
-iteration = 1
 walking = True
 finished = False
 
-# Lambda for new (x, y) for backtrack method
-N1 = lambda xv, yv: (xv + 2, yv)
-S1 = lambda xv, yv: (xv - 2, yv)
-E1 = lambda xv, yv: (xv, yv - 2)
-W1 = lambda xv, yv: (xv, yv + 2)
-directions_one = [N1, S1, E1, W1]
+c_dir_one = [
+    lambda x, y: (x + 2, y),
+    lambda x, y: (x - 2, y),
+    lambda x, y: (x, y - 2),
+    lambda x, y: (x, y + 2)
+]
 
-#  Lambda for new (x, y) and between (x, y) for walk method
-N2 = lambda xv, yv: (xv + 2, yv, xv + 1, yv)
-S2 = lambda xv, yv: (xv - 2, yv, xv - 1, yv)
-E2 = lambda xv, yv: (xv, yv - 2, xv, yv - 1)
-W2 = lambda xv, yv: (xv, yv + 2, xv, yv + 1)
-directions_two = [N2, S2, E2, W2]
+dir_two = [
+    lambda x, y: (x + 2, y, x + 1, y),
+    lambda x, y: (x - 2, y, x - 1, y),
+    lambda x, y: (x, y - 2, x, y - 1),
+    lambda x, y: (x, y + 2, x, y + 1)
+]
+
+
+def shuffled(l):
+    """Returns shuffled list"""
+    result = l[:]
+    shuffle(result)
+    return result
+
+
+def out_of_bounds(x, y):
+    """Checks if indices are out of bounds"""
+    global row_count_with_walls, col_count_with_walls
+    return True if x < 0 or y < 0 or x >= row_count_with_walls or y >= col_count_with_walls else False
 
 
 def walk():
     """Walks over maze"""
-    global x, y, maze, iteration, current_cells, walking, hunting
-    # tx, ty = test x, y for testing
-    # bx, by = between x, y between new and old x, y
-    changed = False
-    random.shuffle(directions_two)
-    for direction in directions_two:
-        tx, ty, bx, by = direction(x, y)  # Create test x, y and between x, y
-        if 0 <= tx < len(maze) and 0 <= ty < len(maze[0]):  # Check if indices are valid
-            if maze[tx, ty, 0] == 0:  # Check if cell is unvisited
-                changed = True
-                break
-
-    if changed:
-        maze[tx, ty] = [255, 255, 255]
-        maze[bx, by] = [255, 255, 255]
-        current_cells.append((bx, by))
-
-        x = tx
-        y = ty
-
-        walking = True
-    else:
-        walking = False
-        iteration = 1
+    global x, y, maze, dir_two, iteration, walking, current_cells
+    for direction in shuffled(dir_two):  # Check adjacent cells randomly
+        tx, ty, bx, by = direction(x, y)
+        if not out_of_bounds(tx, ty) and maze[tx, ty, 0] == 0:  # Check if unvisited
+            maze[tx, ty] = maze[bx, by] = [255, 255, 255]  # Mark as visited
+            current_cells.append((bx, by))
+            x, y, walking = tx, ty, True
+            return # Return new cell and continue walking
+    walking = False
+    iteration = 1
 
 
 def hunt():
     """Scans maze for new position"""
-    global x, y, iteration, last_iteration, walking, hunting, finished
-    i = iteration
-    for j in range(1, len(maze[0]) - 1, 2):
-        if maze[i, j, 0] == 0:  # Check if cell is unvisited
-            random.shuffle(directions_one)
-            for direction in directions_one:
-                tx, ty = direction(i, j)  # Create test x, y
-                if 0 <= tx < len(maze) and 0 <= ty < len(maze[0]):  # Check if indices are valid
-                    if maze[tx, ty, 0] == 255:  # Check if cell has visited neighbour
-                        x, y = tx, ty
-                        walking = True
-                        return  # Return visited neighbour
-        if (i == len(maze) - 2) and (j == len(maze[0]) - 2):
+    global x, y, maze, iteration, last_iteration, walking, finished
+    x = iteration
+    for y in range(1, col_count_with_walls - 1, 2):
+        if maze[x, y, 0] == 0:  # Check if unvisited
+            for direction in shuffled(c_dir_one):  # Check adjacent cells randomly
+                tx, ty = direction(x, y)
+                if not out_of_bounds(tx, ty) and maze[tx, ty, 0] == 255:  # Check if visited
+                    x, y, walking = tx, ty, True
+                    return  # Return visited neighbour
+        if x == row_count_with_walls - 2 and y == col_count_with_walls - 2:
             finished = True
             return
     last_iteration = iteration
@@ -92,16 +88,14 @@ def hunt():
 
 def draw_cells():
     """Draws cells"""
-    # Swapped x and y because output was weird
-    global last_cells, current_cells
-    fill(255)
-    for x, y in last_cells:
-        rect(y * scale, x * scale, scale, scale)
+    global current_cells, last_cells, scale
     fill(0, 255, 0)
     for x, y in current_cells:
         rect(y * scale, x * scale, scale, scale)
-    last_cells = current_cells
-    if not walking:  # Remove current cells before hunting
+    fill(255)
+    for x, y in last_cells:
+        rect(y * scale, x * scale, scale, scale)
+    if not walking:
         fill(255)
         for x, y in current_cells:
             rect(y * scale, x * scale, scale, scale)
@@ -109,53 +103,49 @@ def draw_cells():
         fill(255)
         for x, y in current_cells:
             rect(y * scale, x * scale, scale, scale)
-    current_cells = []
+        draw_row()
+    current_cells, last_cells = [], current_cells
 
 
 def draw_row():
     """Draws row"""
-    # Swapped x and y because output was weird
+    global maze, iteration, last_iteration, scale
     if not walking:  # Draw green line
-        for i in range(0, len(maze[0])):
+        for i in range(0, len(maze[0])):  # Redraw previous row
             color = maze[last_iteration, i]
             fill(color[0], color[1], color[2])
             rect(i * scale, last_iteration * scale, scale, scale)
-
-        fill(0, 255, 0)
+        fill(0, 255, 0)  # Draw green line
         rect(0, iteration * scale, len(maze[0]) * scale, scale)
     if walking:  # Remove last green line after hunting finished
         for i in range(0, len(maze[0])):
             color = maze[iteration, i]
             fill(color[0], color[1], color[2])
             rect(i * scale, iteration * scale, scale, scale)
-    if finished:  # Remove last row
+    if finished:  # Redraw last row
         for i in range(0, len(maze[0])):
             color = maze[len(maze) - 2, i]
             fill(color[0], color[1], color[2])
             rect(i * scale, (len(maze) - 2) * scale, scale, scale)
+        noLoop()
 
 
 def setup():
-    size(col_count_with_walls * scale, row_count_with_walls * scale)
+    global row_count_with_walls, col_count_with_walls
+    size(col_count_with_walls * scale, row_count_with_walls * scale, caption="Hunt and kill algorithm")
     background(0)
+    noStroke()
 
 
 def draw():
-    global current_cells
-    noStroke()
-    if not finished:
-        if walking:
-            walk()
-            current_cells.append((x, y))
-            draw_cells()
-        else:
-            hunt()
-            draw_row()
-        if finished:
-            draw_row()  # Remove last row
-
+    global walking, finished, current_cells
+    if walking:
+        walk()
+        current_cells.append((x, y))
+        draw_cells()
     else:
-        noLoop()
+        hunt()
+        draw_row()
 
 
 run()

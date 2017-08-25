@@ -5,114 +5,110 @@ from maze import *
 row_count = 35
 col_count = 35
 scale = 8
+start = 0  # Top left corner if zero
+end = 0  # Bottom right corner if zero
+create_algorithm = Algorithm.Create.BACKTRACKING
 
-# Define lists
+# Define variables
 m = Maze()
-m.create(row_count, col_count, Algorithm.Create.BACKTRACKING)
+m.create(row_count, col_count, create_algorithm)
 row_count_with_walls = 2 * row_count + 1
 col_count_with_walls = 2 * col_count + 1
 solution = m.maze.copy()
 
-visited_cells = m.maze.copy()  # List of visited cells, value of visited cell is [0, ?, ?]
-stack = list()  # Stack of current path
+visited_cells = m.maze.copy()  # List of visited cells, value of visited cell is [0, 0, 0]
+stack = []  # List of visited cells [(x, y), ...]
 
-# Color
-offset = 0
-r = 255
-b = 0
+# Define start and end
+if start == 0:
+    start = (0, 0)
+if end == 0:
+    end = (row_count - 1, col_count - 1)
+start = tuple([2 * x + 1 for x in start])
+end = tuple([2 * x + 1 for x in end])
 
-# Start
-start = (1, 1)
-end = (len(m.maze) - 2, len(m.maze[0]) - 2)
 x, y = start
-visited_cells[x, y, 0] = 0
+visited_cells[x, y] = [0, 0, 0]
 stack.append((x, y))
 
-current_cells = list()  # List of x and y
-last_cells = list()  # List of x and y
+current_cells = []  # List of cells [(x, y), ...]
+last_cells = []  # List of cells [(x, y), ...]
 current_cells.append((x, y))
 
 walking = True
 finished = False
 found = False
-first_time = False
+first_time = True  # Compensate for only one step at first backtrack
 
-# Lambda for new x, y for backtrack method
-N1 = lambda xv, yv: (xv + 1, yv)
-S1 = lambda xv, yv: (xv - 1, yv)
-E1 = lambda xv, yv: (xv, yv - 1)
-W1 = lambda xv, yv: (xv, yv + 1)
-directions_one = [N1, S1, E1, W1]
+s_dir_one = [
+    lambda x, y: (x + 1, y),
+    lambda x, y: (x - 1, y),
+    lambda x, y: (x, y - 1),
+    lambda x, y: (x, y + 1)
+]
 
-#  Lambda for new x, y and between x, y for walk method
-N2 = lambda xv, yv: (xv + 2, yv, xv + 1, yv)
-S2 = lambda xv, yv: (xv - 2, yv, xv - 1, yv)
-E2 = lambda xv, yv: (xv, yv - 2, xv, yv - 1)
-W2 = lambda xv, yv: (xv, yv + 2, xv, yv + 1)
-directions_two = [N2, S2, E2, W2]
+dir_two = [
+    lambda x, y: (x + 2, y, x + 1, y),
+    lambda x, y: (x - 2, y, x - 1, y),
+    lambda x, y: (x, y - 2, x, y - 1),
+    lambda x, y: (x, y + 2, x, y + 1)
+]
+
+
+def out_of_bounds(self, x, y):
+        """Checks if indices are out of bounds"""
+        global row_count_with_walls, col_count_with_walls
+        return True if x < 0 or y < 0 or x >= row_count_with_walls or y >= col_count_with_walls else False
 
 
 def walk():
     """Walks over maze"""
-    global x, y, solution, stack, current_cells, walking, first_time
-    # tx, ty = test x, y for testing
-    # bx, by = between x, y between new and old x, y
-    changed = False
-    for direction in directions_two:
+    global x, y, stack, walking, current_cells
+    for direction in dir_two:  # Check adjacent cells
         tx, ty, bx, by = direction(x, y)
-        if visited_cells[bx, by, 0] == 255:  # Check if cell is unvisited
-            changed = True
-            break
-
-    if changed:
-        visited_cells[bx, by, 0] = 0  # Mark visited cells
-        visited_cells[tx, ty, 0] = 0  # Mark visited cells
-
-        stack.append((bx, by))
-        stack.append((tx, ty))
-
-        current_cells.append((bx, by))
-
-        x = tx
-        y = ty
-
-        walking = True
-    else:
-        walking = False
-        first_time = True
+        if visited_cells[bx, by, 0] == 255:  # Check if unvisited
+            visited_cells[bx, by] = visited_cells[tx, ty] = [0, 0, 0]  # Mark as visited
+            stack.extend([(bx, by), (tx, ty)])
+            current_cells.append((bx, by))
+            x, y, walking = tx, ty, True
+            return  # Return new cell and continue walking
+    walking, first_time = False, True
+    return  # Return old cell and stop walking
 
 
 def backtrack():
     """Backtracks stack"""
-    global x, y, stack, walking, finished, found
+    global x, y, stack, walking, finished
     x, y = stack.pop()
-    for direction in directions_one:
+    if not stack:
+        finished = True
+        return
+    for direction in s_dir_one:  # Check adjacent cells
         tx, ty = direction(x, y)
-        if visited_cells[tx, ty, 0] == 255:  # Check if cell is unvisited
+        if visited_cells[tx, ty, 0] == 255:  # Check if unvisited
             stack.append((x, y))
             walking = True
+            return  # Return cell with unvisited neighbour
 
 
 def draw_maze():
     """Draws maze"""
-    global m
-    # Swapped i and j because output was weird
-    noStroke()
+    global m, row_count_with_walls, col_count_with_walls, scale
     fill(255)
-    for i in range(0, len(m.maze)):
-        for j in range(0, len(m.maze[0])):
-            if m.maze[i, j, 0] == 255:
-                rect(j * scale, i * scale, scale, scale)
+    for x in range(0, row_count_with_walls):
+        for y in range(0, col_count_with_walls):
+            if m.maze[x, y, 0] == 255:
+                rect(y * scale, x * scale, scale, scale)
 
 
 def draw_stack():
     """Draws stack"""
-    global x, y, r, b, finished
+    global x, y, r, g, b, offset, scale, finished
     if stack:  # Color path
         r -= offset
         b += offset
+        fill(r, g, b)
         x, y = stack.pop()
-        fill(r, 0, b)
         rect(y * scale, x * scale, scale, scale)
     else:
         finished = True
@@ -120,48 +116,44 @@ def draw_stack():
 
 def draw_cells():
     """Draws cells"""
-    global last_cells, current_cells
-    fill(128)
-    for x, y in last_cells:
-        rect(y * scale, x * scale, scale, scale)
+    global current_cells, last_cells
     fill(0, 255, 0)
     for x, y in current_cells:
         rect(y * scale, x * scale, scale, scale)
-    last_cells = current_cells
+    fill(128)
+    for x, y in last_cells:
+        rect(y * scale, x * scale, scale, scale)
     if finished:
         fill(128)
         for x, y in current_cells:
             rect(y * scale, x * scale, scale, scale)
-    current_cells = []
+    current_cells, last_cells = [], current_cells
 
 
 def setup():
     size(col_count_with_walls * scale, row_count_with_walls * scale)
     background(0)
+    noStroke()
     draw_maze()
 
 
 def draw():
-    global offset, current_cells, found, first_time
-    noStroke()
-    if not finished:
-        if not found:
-            if walking:
-                walk()
-            else:
-                if first_time:
-                    backtrack()  # Compensate for only one step at first backtrack
-                    first_time = False
-                backtrack()  # Double backtrack to compensate single pop in backtrack
-                backtrack()
-            current_cells.append((x, y))  # Append current cell
-            draw_cells()
-            if (x, y) == end:  # Stop at end
-                found = True
-                offset = 255 / len(stack)
+    global x, y, stack, r, g, b, offset, end, found, first_time, current_cells
+    if not found:
+        if walking:
+            walk()
         else:
-            draw_stack()
+            if first_time:
+                backtrack()  # Compensate for only one step at first backtrack
+                first_time = False
+            backtrack()  # Double backtrack to compensate single pop in backtrack
+            backtrack()
+        current_cells.append((x, y))
+        draw_cells()
+        if (x, y) == end:  # Stop at end
+            found = True
+            r, b, g, offset = 255, 0, 0, 255 / len(stack)
     else:
-        noLoop()
+        draw_stack()
 
 run()
