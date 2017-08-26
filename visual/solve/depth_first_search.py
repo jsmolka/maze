@@ -79,10 +79,10 @@ def walk():
 def backtrack():
     """Backtracks stack"""
     global x, y, stack, walking, finished
-    x, y = stack.pop()
     if not stack:
         finished = True
         return
+    x, y = stack.pop()
     for direction in s_dir_one:  # Check adjacent cells
         tx, ty = direction(x, y)
         if visited_cells[tx, ty, 0] == 255:  # Check if unvisited
