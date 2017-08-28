@@ -103,7 +103,7 @@ def draw_cells():
 
 
 def setup():
-    size(col_count_with_walls * scale, row_count_with_walls * scale)
+    size(col_count_with_walls * scale, row_count_with_walls * scale, caption="Breadth-first search")
     background(0)
     noStroke()
     draw_maze()
