@@ -437,14 +437,13 @@ class Maze:
 
         raise Exception("No solution found")
 
-    def save_maze_as_png(self, file_name="maze.png", upscale_factor=3):
+    def save_maze_as_png(self, file_name="maze.png", factor=3):
         """Saves maze as png"""
         if self.maze is None:
             raise Exception("Maze is not assigned\n"
                             "Use \"create\" or \"load_maze\" method to create or load a maze")
 
-        img = Image.fromarray(Maze.__upscale(self.maze, upscale_factor), "RGB")
-        img.save(file_name, "png")
+        Image.fromarray(Maze.__upscale(self.maze, factor), "RGB").save(file_name, "png")
 
     def save_maze_as_json(self, file_name="maze.json", indent=0):
         """Saves maze as json"""
@@ -456,14 +455,13 @@ class Maze:
             dump(self.maze.tolist(), outfile) if indent == 0 else dump(self.maze.tolist(), outfile, indent=indent)
 
 
-    def save_solution_as_png(self, file_name="solution.png", upscale_factor=3):
+    def save_solution_as_png(self, file_name="solution.png", factor=3):
         """Saves solution as png"""
         if self.solution is None:
             raise Exception("Solution is not assigned\n"
                             "Use \"solve\" method to solve a maze")
 
-        img = Image.fromarray(Maze.__upscale(self.solution, upscale_factor), "RGB")
-        img.save(file_name, "png")
+        Image.fromarray(Maze.__upscale(self.solution, factor), "RGB").save(file_name, "png")
 
     def save_solution_as_json(self, file_name="solution.json", indent=0):
         """Saves solution as json"""
@@ -479,8 +477,7 @@ class Maze:
         if not isfile(file_name):
             raise Exception("{0} does not exist".format(file_name))
 
-        image = Image.open(file_name)
-        self.maze = Maze.__downscale(np.array(image))
+        self.maze = Maze.__downscale(np.array(Image.open(file_name)))
 
     def load_maze_from_json(self, file_name="maze.json"):
         """Loads maze from json"""
@@ -495,8 +492,7 @@ class Maze:
         if not isfile(file_name):
             raise Exception("{0} does not exist".format(file_name))
 
-        image = Image.open(file_name)
-        self.solution = Maze.__downscale(np.array(image))
+        self.solution = Maze.__downscale(np.array(Image.open(file_name)))
 
     def load_solution_from_json(self, file_name="solution.json"):
         """Loads solution from json"""
@@ -509,43 +505,41 @@ class Maze:
     @staticmethod
     def __upscale(maze, factor):
         """Upscales maze"""
+        if not isinstance(maze, np.ndarray):
+            maze = np.array(maze)  # Make sure maze is a numpy array
         if factor <= 1:
-            return np.array(maze)
-        row_count = len(maze)
-        col_count = len(maze[0])
-        scaled_maze = np.zeros((factor * row_count, factor * col_count, 3), dtype=np.uint8)
+            return maze
+        row_count, col_count = len(maze), len(maze[0])
+        result = np.zeros((factor * row_count, factor * col_count, 3), dtype=np.uint8)
 
         for x in range(0, row_count):
             for y in range(0, col_count):
                 for i in range(0, factor):
                     for j in range(0, factor):
-                        scaled_maze[factor * x + i, factor * y + j] = maze[x, y]
-        return scaled_maze
+                        result[factor * x + i, factor * y + j] = maze[x, y]
+        return result
 
     @staticmethod
     def __downscale(maze):
         """Downscales maze"""
-        row_count = len(maze)
-        col_count = len(maze[0])
 
-        factor = 0
-        stop = False
-        for x in range(1, row_count):
-            for y in range(1, col_count):
-                if maze[x, y, 0] != 0:
-                    stop = True
-                    factor = x
-                    break
-            if stop:
-                break
+        def get_factor(maze):
+            """Calculates factor of maze"""
+            for x in range(1, len(maze)):
+                for y in range(0, len(maze[0])):
+                    if maze[x, y, 0] != 0:
+                        return x
+
+        if not isinstance(maze, np.ndarray):
+            maze = np.array(maze)  # Make sure maze is a numpy array
+        factor = get_factor(maze)
         if factor <= 1:
-            return np.array(maze)
+            return maze
 
-        row_count = row_count // factor
-        col_count = col_count // factor
-        scaled_maze = np.zeros((row_count, col_count, 3), dtype=np.uint8)
+        row_count, col_count = len(maze) // factor, len(maze[0]) // factor
+        result = np.zeros((row_count, col_count, 3), dtype=np.uint8)
 
         for x in range(0, row_count):
             for y in range(0, col_count):
-                scaled_maze[x, y] = maze[x * factor, y * factor]
-        return scaled_maze
+                result[x, y] = maze[x * factor, y * factor]
+        return result
