@@ -55,15 +55,9 @@ dir_two = [
 ]
 
 
-def out_of_bounds(self, x, y):
-        """Checks if indices are out of bounds"""
-        global row_count_with_walls, col_count_with_walls
-        return True if x < 0 or y < 0 or x >= row_count_with_walls or y >= col_count_with_walls else False
-
-
 def walk():
     """Walks over maze"""
-    global x, y, stack, walking, current_cells
+    global x, y, stack, walking, first_time, current_cells
     for direction in dir_two:  # Check adjacent cells
         tx, ty, bx, by = direction(x, y)
         if visited_cells[bx, by, 0] == 255:  # Check if unvisited
@@ -104,7 +98,7 @@ def draw_maze():
 def draw_stack():
     """Draws stack"""
     global x, y, r, g, b, offset, scale, finished
-    if stack:  # Color path
+    if stack:
         r -= offset
         b += offset
         fill(r, g, b)
@@ -155,5 +149,6 @@ def draw():
             r, b, g, offset = 255, 0, 0, 255 / len(stack)
     else:
         draw_stack()
+
 
 run()
