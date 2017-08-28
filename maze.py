@@ -1,4 +1,5 @@
 import numpy as np
+from collections import deque
 from enum import Enum
 from json import dump, load
 from os.path import isfile
@@ -20,6 +21,7 @@ class Algorithm:
 
     class Solve(Enum):
         DEPTH = "Depth-first search"
+        BREADTH = "Breadth-first search"
 
 
 class Maze:
@@ -388,9 +390,19 @@ class Maze:
 
         if algorithm == Algorithm.Solve.DEPTH:
             self.__s_depth_first_search(start, end)
+        elif algorithm == Algorithm.Solve.BREADTH:
+            self.__s_breadth_first_search(start, end)
         else:
             raise Exception("Wrong algorithm\n"
                             "Use \"Algorithm.Solve.<algorithm>\" to choose an algorithm")
+
+    def __s_show_path(self, stack):
+        """Shows path in solution"""
+        r, g, b, offset = 255, 0, 0, 255 / len(stack)
+        while stack:
+            r -= offset
+            b += offset
+            self.solution[stack.pop()] = [r, g, b]
 
     def __s_walk(self, x, y, stack, visited_cells):
         """Walks over maze"""
@@ -427,15 +439,36 @@ class Maze:
             while walking:
                 x, y, stack, visited_cells, walking = self.__s_walk(x, y, stack, visited_cells)
                 if (x, y) == end:  # Stop if end has been found
-                    r, g, b, offset = 255, 0, 0, 255 / len(stack)
-                    while stack:  # Color path
-                        r -= offset
-                        b += offset
-                        self.solution[stack.pop()] = [r, g, b]
-                    return
+                    return self.__s_show_path(stack)
             x, y, stack = self.__s_backtrack(stack, visited_cells)
 
         raise Exception("No solution found")
+
+    def __s_enqueue(self, deque_, visited_cells):
+        """Queues next items"""
+        x, y, stack = deque_.popleft()
+        for direction in self.__dir_two:  # Check adjacent cells
+            tx, ty, bx, by = direction(x, y)
+            if visited_cells[bx, by, 0] == 255:  # Check if unvisited
+                visited_cells[bx, by] = visited_cells[tx, ty] = [0, 0, 0]  # Mark as visited
+                stack.extend([(bx, by), (tx, ty)])
+                deque_.append((tx, ty, stack))
+                stack = stack[:-2]  # Reset stack
+        return deque_  # Return deque with enqueued cells
+
+    def __s_breadth_first_search(self, start, end):
+        """Solves maze with breadth-first search"""
+        visited_cells = self.maze.copy()  # List of visited cells, value of visited cell is [0, 0, 0]
+        deque_ = deque()  # List of cells with according stack [(x, y, stack), ...]
+
+        x, y = start
+        deque_.append((x, y, [(x, y)]))
+        visited_cells[x, y] = [0, 0, 0]  # Mark as visited
+
+        while True:
+            deque_ = self.__s_enqueue(deque_, visited_cells)
+            if (deque_[0][0], deque_[0][1]) == end:  # Stop if end has been found
+                return self.__s_show_path(deque_[0][2])
 
     def save_maze_as_png(self, file_name="maze.png", factor=3):
         """Saves maze as png"""
@@ -452,8 +485,10 @@ class Maze:
                             "Use \"create\" or \"load_maze\" method to create or load a maze")
 
         with open(file_name, "w") as outfile:
-            dump(self.maze.tolist(), outfile) if indent == 0 else dump(self.maze.tolist(), outfile, indent=indent)
-
+            if indent == 0:
+                dump(self.maze.tolist(), outfile)
+            else:
+                dump(self.maze.tolist(), outfile, indent=indent)
 
     def save_solution_as_png(self, file_name="solution.png", factor=3):
         """Saves solution as png"""
@@ -470,7 +505,10 @@ class Maze:
                             "Use \"solve\" method to solve a maze")
 
         with open(file_name, "w") as outfile:
-            dump(self.solution.tolist(), outfile) if indent == 0 else dump(self.solution.tolist(), outfile, indent=indent)
+            if indent == 0:
+                dump(self.solution.tolist(), outfile)
+            else:
+                dump(self.solution.tolist(), outfile, indent=indent)
 
     def load_maze_from_png(self, file_name="maze.png"):
         """Loads maze from png"""
@@ -523,12 +561,12 @@ class Maze:
     def __downscale(maze):
         """Downscales maze"""
 
-        def get_factor(maze):
+        def get_factor(maze_):
             """Calculates factor of maze"""
-            for x in range(1, len(maze)):
-                for y in range(0, len(maze[0])):
-                    if maze[x, y, 0] != 0:
-                        return x
+            for x_ in range(1, len(maze_)):
+                for y_ in range(0, len(maze_[0])):
+                    if maze_[x_, y_, 0] != 0:
+                        return x_
 
         if not isinstance(maze, np.ndarray):
             maze = np.array(maze)  # Make sure maze is a numpy array

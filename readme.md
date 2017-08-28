@@ -28,6 +28,7 @@ If you want to run the visual examples in the visual directory, you have to inst
 
 ### Solving
 - Depth-first search
+- Breadth-first search
 
 ## Requirements
 - NumPy
