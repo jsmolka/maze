@@ -49,7 +49,7 @@ dir_two = [
 
 
 def enqueue(deque_, visited_cells):
-    """Queues next items"""
+    """Queues next cells"""
     global dir_two, current_cells
     x, y, stack = deque_.popleft()
     for direction in dir_two:  # Check adjacent cells

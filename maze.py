@@ -445,7 +445,7 @@ class Maze:
         raise Exception("No solution found")
 
     def __s_enqueue(self, deque_, visited_cells):
-        """Queues next items"""
+        """Queues next cells"""
         x, y, stack = deque_.popleft()
         for direction in self.__dir_two:  # Check adjacent cells
             tx, ty, bx, by = direction(x, y)
