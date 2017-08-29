@@ -70,7 +70,7 @@ def walk():
 
 def hunt():
     """Scans maze for new position"""
-    global x, y, maze, iteration, last_iteration, walking, finished
+    global x, y, row_count_with_walls, col_count_with_walls, maze, c_dir_one, iteration, last_iteration, walking, finished
     x = iteration
     for y in range(1, col_count_with_walls - 1, 2):
         if maze[x, y, 0] == 0:  # Check if unvisited
@@ -88,7 +88,7 @@ def hunt():
 
 def draw_cells():
     """Draws cells"""
-    global current_cells, last_cells, scale
+    global finished, current_cells, last_cells, scale
     fill(0, 255, 0)
     for x, y in current_cells:
         rect(y * scale, x * scale, scale, scale)
@@ -109,7 +109,7 @@ def draw_cells():
 
 def draw_row():
     """Draws row"""
-    global maze, iteration, last_iteration, scale
+    global maze, iteration, last_iteration, walking, finished, scale
     if not walking:  # Draw green line
         for i in range(0, len(maze[0])):  # Redraw previous row
             color = maze[last_iteration, i]
@@ -131,14 +131,14 @@ def draw_row():
 
 
 def setup():
-    global row_count_with_walls, col_count_with_walls
+    global row_count_with_walls, col_count_with_walls, scale
     size(col_count_with_walls * scale, row_count_with_walls * scale, caption="Hunt and kill algorithm")
     background(0)
     noStroke()
 
 
 def draw():
-    global walking, finished, current_cells
+    global walking, current_cells
     if walking:
         walk()
         current_cells.append((x, y))

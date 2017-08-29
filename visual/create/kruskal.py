@@ -75,7 +75,7 @@ def choose_edge():
 
 def draw_edge():
     """Draws edge"""
-    global finished, current_edge, last_edge
+    global finished, current_edge, last_edge, scale
     for x, y in current_edge:
         fill(0, 255, 0)
         rect(y * scale, x * scale, scale, scale)
@@ -91,7 +91,7 @@ def draw_edge():
 
 
 def setup():
-    global row_count_with_walls, col_count_with_walls
+    global row_count_with_walls, col_count_with_walls, scale
     size(col_count_with_walls * scale, row_count_with_walls * scale, caption="Kruskal's algorithm")
     background(0)
     noStroke()

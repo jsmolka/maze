@@ -7,7 +7,7 @@ row_count = 35
 col_count = 35
 scale = 8
 
-# Create variables
+# Define variables
 row_count_with_walls = 2 * row_count + 1
 col_count_with_walls = 2 * col_count + 1
 maze = np.zeros((row_count_with_walls, col_count_with_walls, 3), dtype=np.uint8)  # Height, width, RGB
@@ -126,7 +126,7 @@ def create_links():
 
 def draw_cells():
     """Draws cells"""
-    global current_cells, last_cells, scale
+    global finished, current_cells, last_cells, scale
     for x, y in current_cells:
         fill(0, 255, 0)
         rect(y * scale, x * scale, scale, scale)
@@ -141,7 +141,7 @@ def draw_cells():
 
 
 def setup():
-    global row_count_with_walls, col_count_with_walls
+    global row_count_with_walls, col_count_with_walls, scale
     size(col_count_with_walls * scale, row_count_with_walls * scale, caption="Eller's algorithm")
     background(0)
     noStroke()
@@ -149,6 +149,7 @@ def setup():
 
 
 def draw():
+    global creating_cells
     if creating_cells:
         create_cells()
     else:

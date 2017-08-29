@@ -1,5 +1,5 @@
-from pyprocessing import *
 from maze import *
+from pyprocessing import *
 
 # Configuration
 row_count = 35
@@ -14,7 +14,6 @@ m = Maze()
 m.create(row_count, col_count, create_algorithm)
 row_count_with_walls = 2 * row_count + 1
 col_count_with_walls = 2 * col_count + 1
-solution = m.maze.copy()
 
 visited_cells = m.maze.copy()  # List of visited cells, value of visited cell is [0, 0, 0]
 stack = []  # List of visited cells [(x, y), ...]
@@ -57,7 +56,7 @@ dir_two = [
 
 def walk():
     """Walks over maze"""
-    global x, y, stack, walking, first_time, current_cells
+    global x, y, stack, visited_cells, walking, first_time, current_cells
     for direction in dir_two:  # Check adjacent cells
         tx, ty, bx, by = direction(x, y)
         if visited_cells[bx, by, 0] == 255:  # Check if unvisited
@@ -67,12 +66,11 @@ def walk():
             x, y, walking = tx, ty, True
             return  # Return new cell and continue walking
     walking, first_time = False, True
-    return  # Return old cell and stop walking
 
 
 def backtrack():
     """Backtracks stack"""
-    global x, y, stack, walking, finished
+    global x, y, stack, visited_cells, walking, finished
     if not stack:
         finished = True
         return
@@ -97,7 +95,7 @@ def draw_maze():
 
 def draw_stack():
     """Draws stack"""
-    global x, y, r, g, b, offset, scale, finished
+    global x, y, r, g, b, offset, finished, scale
     if stack:
         r -= offset
         b += offset
@@ -110,7 +108,7 @@ def draw_stack():
 
 def draw_cells():
     """Draws cells"""
-    global current_cells, last_cells
+    global finished, current_cells, last_cells, scale
     fill(0, 255, 0)
     for x, y in current_cells:
         rect(y * scale, x * scale, scale, scale)
@@ -125,14 +123,15 @@ def draw_cells():
 
 
 def setup():
-    size(col_count_with_walls * scale, row_count_with_walls * scale, caption="Depth-first search")
+    global row_count_with_walls, col_count_with_walls, scale
+    size(col_count_with_walls * scale, row_count_with_walls * scale, caption=Algorithm.Solve.DEPTH.value)
     background(0)
     noStroke()
     draw_maze()
 
 
 def draw():
-    global x, y, stack, r, g, b, offset, end, found, first_time, current_cells
+    global x, y, stack, r, g, b, offset, end, walking, found, first_time, current_cells
     if not found:
         if walking:
             walk()

@@ -82,7 +82,7 @@ def backtrack():
 
 def draw_cells():
     """Draws cells"""
-    global finished, current_cells, last_cells
+    global finished, current_cells, last_cells, scale
     fill(0, 255, 0)
     for x, y in current_cells:
         rect(y * scale, x * scale, scale, scale)
@@ -98,13 +98,14 @@ def draw_cells():
 
 
 def setup():
+    global row_count_with_walls, col_count_with_walls, scale
     size(col_count_with_walls * scale, row_count_with_walls * scale, caption="Recursive backtracking algorithm")
     background(0)
     noStroke()
 
 
 def draw():
-    global x, y, stack, current_cells
+    global x, y, stack, walking, current_cells
     if walking:
         stack.append((x, y))
         walk()

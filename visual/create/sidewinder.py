@@ -40,7 +40,7 @@ def create_first_row():
 
 def create_cells():
     """Creates cells"""
-    global x, y, row_stack, row_count_with_walls, col_count_with_walls, finished, current_cells
+    global x, y, maze, row_stack, row_count_with_walls, col_count_with_walls, finished, current_cells
     maze[x, y] = [255, 255, 255]
     row_stack.append(y)
 
@@ -74,7 +74,7 @@ def create_cells():
 
 def draw_cells():
     """Draws cells"""
-    global finished, current_cells, last_cells
+    global finished, current_cells, last_cells, scale
     for x, y in current_cells:
         fill(0, 255, 0)
         rect(y * scale, x * scale, scale, scale)
@@ -89,12 +89,14 @@ def draw_cells():
 
 
 def setup():
+    global row_count_with_walls, col_count_with_walls, scale
     size(col_count_with_walls * scale, row_count_with_walls * scale, caption="Sidewinder algorithm")
     background(0)
     noStroke()
 
 
 def draw():
+    global first_row
     if first_row:
         create_first_row()
     else:
