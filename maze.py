@@ -402,7 +402,7 @@ class Maze:
         while stack:
             r -= offset
             b += offset
-            self.solution[stack.pop()] = [r, g, b]
+            self.solution[tuple(stack.pop())] = [r, g, b]
 
     def __s_walk(self, x, y, stack, visited_cells):
         """Walks over maze"""
@@ -451,24 +451,26 @@ class Maze:
             tx, ty, bx, by = direction(x, y)
             if visited_cells[bx, by, 0] == 255:  # Check if unvisited
                 visited_cells[bx, by] = visited_cells[tx, ty] = [0, 0, 0]  # Mark as visited
-                stack.extend([(bx, by), (tx, ty)])
-                deque_.append((tx, ty, stack))
-                stack = stack[:-2]  # Reset stack
+                deque_.append((tx, ty, np.append(stack, [(bx, by), (tx, ty)], axis=0)))
         return deque_  # Return deque with enqueued cells
 
     def __s_breadth_first_search(self, start, end):
         """Solves maze with breadth-first search"""
         visited_cells = self.maze.copy()  # List of visited cells, value of visited cell is [0, 0, 0]
         deque_ = deque()  # List of cells with according stack [(x, y, stack), ...]
+        stack = np.zeros((1, 2), dtype=np.uint16)  # List of visited cells [[x, y], ...]
 
         x, y = start
-        deque_.append((x, y, [(x, y)]))
+        stack[0] = (x, y)
+        deque_.append((x, y, stack))
         visited_cells[x, y] = [0, 0, 0]  # Mark as visited
 
-        while True:
+        while deque_:
             deque_ = self.__s_enqueue(deque_, visited_cells)
             if (deque_[0][0], deque_[0][1]) == end:  # Stop if end has been found
-                return self.__s_show_path(deque_[0][2])
+                return self.__s_show_path(deque_[0][2].tolist())
+
+        raise Exception("No solution found")
 
     def save_maze_as_png(self, file_name="maze.png", factor=3):
         """Saves maze as png"""
