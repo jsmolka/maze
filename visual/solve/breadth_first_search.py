@@ -32,7 +32,7 @@ end = tuple([2 * x + 1 for x in end])
 
 def push(stack, item):
     """Pushes item into spaghetti stack"""
-    return (item, stack)
+    return item, stack
 
 
 x, y = start

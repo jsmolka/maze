@@ -460,7 +460,7 @@ class Maze:
     @staticmethod
     def __s_push(stack, item):
         """Pushes item into spaghetti stack"""
-        return (item, stack)
+        return item, stack
 
     @staticmethod
     def __s_stack_to_list(stack):
