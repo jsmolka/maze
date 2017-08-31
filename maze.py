@@ -1,5 +1,5 @@
 import numpy as np
-from collections import deque
+from collections import deque as deque_
 from enum import Enum
 from json import dump, load
 from os.path import isfile
@@ -396,13 +396,26 @@ class Maze:
             raise Exception("Wrong algorithm\n"
                             "Use \"Algorithm.Solve.<algorithm>\" to choose an algorithm")
 
-    def __s_show_path(self, stack):
-        """Shows path in solution"""
-        r, g, b, offset = 255, 0, 0, 255 / len(stack)
-        while stack:
-            r -= offset
-            b += offset
-            self.solution[tuple(stack.pop())] = [r, g, b]
+    def __s_draw_path(self, stack, complete=True):
+        """Draws path in solution"""
+
+        def color(offset_, iteration):
+            """Returns color for current iteration"""
+            return [0 + (iteration * offset_), 0, 255 - (iteration * offset_)]
+
+        if complete:  # Stack contains all cells of the path
+            offset = 255 / len(stack)
+            for i in range(0, len(stack)):
+                self.solution[tuple(stack[i])] = color(offset, i)
+        else:  # Stack contains every second cell of the path
+            offset = 255 / (2 * len(stack))
+            for i in range(0, len(stack) - 1):
+                x1, y1 = tuple(stack[i])
+                x2, y2 = tuple(stack[i + 1])
+                self.solution[x1, y1] = color(offset, 2 * i)
+                x3, y3 = int((x1 + x2) / 2), int((y1 + y2) / 2)
+                self.solution[x3, y3] = color(offset, 2 * i + 1)
+            self.solution[tuple(stack[-1])] = color(offset, 2 * (len(stack) - 1))
 
     def __s_walk(self, x, y, stack, visited_cells):
         """Walks over maze"""
@@ -410,7 +423,7 @@ class Maze:
             tx, ty, bx, by = direction(x, y)
             if visited_cells[bx, by, 0] == 255:  # Check if unvisited
                 visited_cells[bx, by] = visited_cells[tx, ty] = [0, 0, 0]  # Mark as visited
-                stack.extend([(bx, by), (tx, ty)])
+                stack.append((tx, ty))
                 return tx, ty, stack, visited_cells, True  # Return new cell and continue walking
         return x, y, stack, visited_cells, False  # Return old cell and stop walking
 
@@ -439,46 +452,62 @@ class Maze:
             while walking:
                 x, y, stack, visited_cells, walking = self.__s_walk(x, y, stack, visited_cells)
                 if (x, y) == end:  # Stop if end has been found
-                    return self.__s_show_path(stack)
+                    return self.__s_draw_path(stack, complete=False)
             x, y, stack = self.__s_backtrack(stack, visited_cells)
 
         raise Exception("No solution found")
 
-    def __s_enqueue(self, deque_, visited_cells):
+    @staticmethod
+    def __s_push(stack, item):
+        """Pushes item into spaghetti stack"""
+        return (item, stack)
+
+    @staticmethod
+    def __s_stack_to_list(stack):
+        """Converts spaghetti stack into list"""
+        l = []
+        while stack:
+            item, stack = stack
+            l.append(item)
+        return l[::-1]
+
+    def __s_enqueue(self, deque, visited_cells):
         """Queues next cells"""
-        x, y, stack = deque_.popleft()
+        cell = deque.popleft()
+        x, y = cell[0]
         for direction in self.__dir_two:  # Check adjacent cells
             tx, ty, bx, by = direction(x, y)
             if visited_cells[bx, by, 0] == 255:  # Check if unvisited
                 visited_cells[bx, by] = visited_cells[tx, ty] = [0, 0, 0]  # Mark as visited
-                deque_.append((tx, ty, np.append(stack, [(bx, by), (tx, ty)], axis=0)))
-        return deque_  # Return deque with enqueued cells
+                deque.append(Maze.__s_push(cell, (tx, ty)))
+        return deque  # Return deque with enqueued cells
 
     def __s_breadth_first_search(self, start, end):
         """Solves maze with breadth-first search"""
         visited_cells = self.maze.copy()  # List of visited cells, value of visited cell is [0, 0, 0]
-        deque_ = deque()  # List of cells with according stack [(x, y, stack), ...]
-        stack = np.zeros((1, 2), dtype=np.uint16)  # List of visited cells [[x, y], ...]
+        deque = deque_()  # List of cells [cell, ...]
+        cell = ()  # Tuple of current cell with according stack ((x, y), stack)
 
         x, y = start
-        stack[0] = (x, y)
-        deque_.append((x, y, stack))
+        cell = Maze.__s_push(cell, (x, y))
+        deque.append(cell)
         visited_cells[x, y] = [0, 0, 0]  # Mark as visited
 
-        while deque_:
-            deque_ = self.__s_enqueue(deque_, visited_cells)
-            if (deque_[0][0], deque_[0][1]) == end:  # Stop if end has been found
-                return self.__s_show_path(deque_[0][2].tolist())
+        while deque:
+            deque = self.__s_enqueue(deque, visited_cells)
+            if deque[0][0] == end:  # Stop if end has been found
+                cell = Maze.__s_push(deque[0], end)  # Push end into cell
+                return self.__s_draw_path(Maze.__s_stack_to_list(cell), complete=False)
 
         raise Exception("No solution found")
 
-    def save_maze_as_png(self, file_name="maze.png", factor=3):
+    def save_maze_as_png(self, file_name="maze.png", scale=3):
         """Saves maze as png"""
         if self.maze is None:
             raise Exception("Maze is not assigned\n"
                             "Use \"create\" or \"load_maze\" method to create or load a maze")
 
-        Image.fromarray(Maze.__upscale(self.maze, factor), "RGB").save(file_name, "png")
+        Image.fromarray(Maze.__upscale(self.maze, scale), "RGB").save(file_name, "png")
 
     def save_maze_as_json(self, file_name="maze.json", indent=0):
         """Saves maze as json"""
@@ -492,13 +521,13 @@ class Maze:
             else:
                 dump(self.maze.tolist(), outfile, indent=indent)
 
-    def save_solution_as_png(self, file_name="solution.png", factor=3):
+    def save_solution_as_png(self, file_name="solution.png", scale=3):
         """Saves solution as png"""
         if self.solution is None:
             raise Exception("Solution is not assigned\n"
                             "Use \"solve\" method to solve a maze")
 
-        Image.fromarray(Maze.__upscale(self.solution, factor), "RGB").save(file_name, "png")
+        Image.fromarray(Maze.__upscale(self.solution, scale), "RGB").save(file_name, "png")
 
     def save_solution_as_json(self, file_name="solution.json", indent=0):
         """Saves solution as json"""
@@ -543,28 +572,28 @@ class Maze:
             self.solution = np.array(load(data_file))
 
     @staticmethod
-    def __upscale(maze, factor):
+    def __upscale(maze, scale):
         """Upscales maze"""
         if not isinstance(maze, np.ndarray):
             maze = np.array(maze)  # Make sure maze is a numpy array
-        if factor <= 1:
+        if scale <= 1:
             return maze
         row_count, col_count = len(maze), len(maze[0])
-        result = np.zeros((factor * row_count, factor * col_count, 3), dtype=np.uint8)
+        result = np.zeros((scale * row_count, scale * col_count, 3), dtype=np.uint8)
 
         for x in range(0, row_count):
             for y in range(0, col_count):
-                for i in range(0, factor):
-                    for j in range(0, factor):
-                        result[factor * x + i, factor * y + j] = maze[x, y]
+                for i in range(0, scale):
+                    for j in range(0, scale):
+                        result[scale * x + i, scale * y + j] = maze[x, y]
         return result
 
     @staticmethod
     def __downscale(maze):
         """Downscales maze"""
 
-        def get_factor(maze_):
-            """Calculates factor of maze"""
+        def get_scale(maze_):
+            """Calculates scale of maze"""
             for x_ in range(1, len(maze_)):
                 for y_ in range(0, len(maze_[0])):
                     if maze_[x_, y_, 0] != 0:
@@ -572,14 +601,14 @@ class Maze:
 
         if not isinstance(maze, np.ndarray):
             maze = np.array(maze)  # Make sure maze is a numpy array
-        factor = get_factor(maze)
-        if factor <= 1:
+        scale = get_scale(maze)
+        if scale <= 1:
             return maze
 
-        row_count, col_count = len(maze) // factor, len(maze[0]) // factor
+        row_count, col_count = len(maze) // scale, len(maze[0]) // scale
         result = np.zeros((row_count, col_count, 3), dtype=np.uint8)
 
         for x in range(0, row_count):
             for y in range(0, col_count):
-                result[x, y] = maze[x * factor, y * factor]
+                result[x, y] = maze[x * scale, y * scale]
         return result

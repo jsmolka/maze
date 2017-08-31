@@ -35,9 +35,8 @@ last_cells = []  # List of cells [(x, y), ...]
 current_cells.append((x, y))
 
 walking = True
-finished = False
 found = False
-first_time = True  # Compensate for only one step at first backtrack
+first_time = True
 
 s_dir_one = [
     lambda x, y: (x + 1, y),
@@ -61,7 +60,7 @@ def walk():
         tx, ty, bx, by = direction(x, y)
         if visited_cells[bx, by, 0] == 255:  # Check if unvisited
             visited_cells[bx, by] = visited_cells[tx, ty] = [0, 0, 0]  # Mark as visited
-            stack.extend([(bx, by), (tx, ty)])
+            stack.append((tx, ty))
             current_cells.append((bx, by))
             x, y, walking = tx, ty, True
             return  # Return new cell and continue walking
@@ -70,10 +69,10 @@ def walk():
 
 def backtrack():
     """Backtracks stack"""
-    global x, y, stack, visited_cells, walking, finished
-    if not stack:
-        finished = True
-        return
+    global x, y, stack, visited_cells, walking, first_time
+    if first_time:  # Compensate for first backtrack after walking
+        first_time = False
+        backtrack()
     x, y = stack.pop()
     for direction in s_dir_one:  # Check adjacent cells
         tx, ty = direction(x, y)
@@ -93,29 +92,45 @@ def draw_maze():
                 rect(y * scale, x * scale, scale, scale)
 
 
+def color(iteration_):
+    """Returns color for current iteration"""
+    global offset
+    return [0 + (iteration_ * offset), 0, 255 - (iteration_ * offset)]
+
+
 def draw_stack():
     """Draws stack"""
-    global x, y, r, g, b, offset, finished, scale
-    if stack:
-        r -= offset
-        b += offset
+    global x, y, offset, iteration, scale
+    if iteration < len(stack) - 1:  # Draw incomplete stack
+        x1, y1 = tuple(stack[iteration])
+        x2, y2 = tuple(stack[iteration + 1])
+        r, g, b = color(2 * iteration)
         fill(r, g, b)
-        x, y = stack.pop()
-        rect(y * scale, x * scale, scale, scale)
+        rect(y1 * scale, x1 * scale, scale, scale)
+        x3, y3 = int((x1 + x2) / 2), int((y1 + y2) / 2)
+        r, g, b = color(2 * iteration + 1)
+        fill(r, g, b)
+        rect(y3 * scale, x3 * scale, scale, scale)
     else:
-        finished = True
+        x, y = tuple(stack[-1])
+        r, g, b = color(2 * (len(stack) - 1))
+        fill(r, g, b)
+        rect(y * scale, x * scale, scale, scale)
+    if iteration == len(stack):
+        noLoop()
+    iteration += 1
 
 
 def draw_cells():
     """Draws cells"""
-    global finished, current_cells, last_cells, scale
+    global found, current_cells, last_cells, scale
     fill(0, 255, 0)
     for x, y in current_cells:
         rect(y * scale, x * scale, scale, scale)
     fill(128)
     for x, y in last_cells:
         rect(y * scale, x * scale, scale, scale)
-    if finished:
+    if found:
         fill(128)
         for x, y in current_cells:
             rect(y * scale, x * scale, scale, scale)
@@ -131,21 +146,17 @@ def setup():
 
 
 def draw():
-    global x, y, stack, r, g, b, offset, end, walking, found, first_time, current_cells
+    global x, y, stack, offset, iteration, end, walking, found, current_cells
     if not found:
         if walking:
             walk()
         else:
-            if first_time:
-                backtrack()  # Compensate for only one step at first backtrack
-                first_time = False
-            backtrack()  # Double backtrack to compensate single pop in backtrack
             backtrack()
         current_cells.append((x, y))
-        draw_cells()
         if (x, y) == end:  # Stop at end
             found = True
-            r, b, g, offset = 255, 0, 0, 255 / len(stack)
+            offset, iteration = 255 / (2 * len(stack)), 0
+        draw_cells()
     else:
         draw_stack()
 
