@@ -15,8 +15,6 @@ The code above creates the following pictures:
 
 ![maze.png](https://raw.githubusercontent.com/jsmolka/maze/master/example/maze.png) ![solution.png](https://raw.githubusercontent.com/jsmolka/maze/master/example/solution.png)
 
-If you want to run the visual examples in the visual directory, you have to install [pyprocessing](https://github.com/jsmolka/pyprocessing).
-
 ## Algorithms
 ### Creating
 - Recursive backtracking algorithm
