@@ -1,44 +1,26 @@
 import numpy as np
 from collections import deque as deque_
-from enum import Enum
-from json import dump, load
-from os.path import isfile
-from PIL import Image
 from random import randint, getrandbits, shuffle
 
+from .algorithm import Algorithm
+from .helper import shuffled, stack_empty, stack_push, stack_to_list
+from .base import MazeBase
 
-class Algorithm:
+
+class Maze(MazeBase):
     """
-    This class contains enumerations for all relevant creating and solving algorithms used in the Maze class
-    """
-    class Create(Enum):
-        BACKTRACKING = "Recursive backtracking algorithm"
-        HUNT = "Hunt and kill algorithm"
-        ELLER = "Eller's algorithm"
-        SIDEWINDER = "Sidewinder algorithm"
-        PRIM = "Prim's algorithm"
-        KRUSKAL = "Kruskal's algorithm"
-
-    class Solve(Enum):
-        DEPTH = "Depth-first search"
-        BREADTH = "Breadth-first search"
-
-
-class Maze:
-    """
-    This class contains all relevant methods for creating and solving mazes
+    This class contains the relevant create and solve Python functions.
 
     Variable explanation:
-    __c_: functions / variables used in create()
-    __s_: functions / variables used in solve()
+    __c_: functions / variables used in create
+    __s_: functions / variables used in solve
     __c_dir_one: returns new x and y with a step length of 2
     __s_dir_one: returns new x and y with a step length of 1
     __dir_two: returns new and between x and y with a step length of 2
     """
     def __init__(self):
         """Constructor"""
-        self.maze = None
-        self.solution = None
+        super().__init__()
 
         self.__c_dir_one = [
             lambda x, y: (x + 2, y),
@@ -60,43 +42,6 @@ class Maze:
             lambda x, y: (x, y - 2, x, y - 1),
             lambda x, y: (x, y + 2, x, y + 1)
         ]
-
-    @property
-    def row_count_with_walls(self):
-        """Returns row count with walls"""
-        if self.maze is not None:
-            return len(self.maze)
-        elif self.solution is not None:
-            return len(self.solution)
-        else:
-            raise Exception("Maze and solution are not assigned")
-
-    @property
-    def col_count_with_walls(self):
-        """Returns column count with walls"""
-        if self.maze is not None:
-            return len(self.maze[0])
-        elif self.solution is not None:
-            return len(self.solution[0])
-        else:
-            raise Exception("Maze and solution are not assigned")
-
-    @property
-    def row_count(self):
-        """Returns row count"""
-        return self.row_count_with_walls // 2
-
-    @property
-    def col_count(self):
-        """Returns column count"""
-        return self.col_count_with_walls // 2
-
-    @staticmethod
-    def __shuffled(l):
-        """Returns shuffled list"""
-        result = l[:]
-        shuffle(result)
-        return result
 
     def __out_of_bounds(self, x, y):
         """Checks if indices are out of bounds"""
@@ -127,7 +72,7 @@ class Maze:
 
     def __c_walk(self, x, y):
         """Walks over maze"""
-        for direction in Maze.__shuffled(self.__dir_two):  # Check adjacent cells randomly
+        for direction in shuffled(self.__dir_two):  # Check adjacent cells randomly
             tx, ty, bx, by = direction(x, y)
             if not self.__out_of_bounds(tx, ty) and self.maze[tx, ty, 0] == 0:  # Check if unvisited
                 self.maze[tx, ty] = self.maze[bx, by] = [255, 255, 255]  # Mark as visited
@@ -167,7 +112,7 @@ class Maze:
                 for y in range(1, self.col_count_with_walls - 1, 2):
                     if self.maze[x, y, 0] == 0:  # Check if unvisited
                         finished = False
-                        for direction in Maze.__shuffled(self.__c_dir_one):  # Check adjacent cells randomly
+                        for direction in shuffled(self.__c_dir_one):  # Check adjacent cells randomly
                             tx, ty = direction(x, y)
                             if not self.__out_of_bounds(tx, ty) and self.maze[tx, ty, 0] == 255:  # Check if visited
                                 return tx, ty, hunt_list  # Return visited neighbour of unvisited cell
@@ -310,7 +255,7 @@ class Maze:
             x, y = frontier.pop(randint(0, len(frontier) - 1))
 
             # Connect cells
-            for direction in Maze.__shuffled(self.__dir_two):
+            for direction in shuffled(self.__dir_two):
                 tx, ty, bx, by = direction(x, y)
                 if not self.__out_of_bounds(tx, ty) and self.maze[tx, ty, 0] == 255:  # Check if visited
                     self.maze[x, y] = self.maze[bx, by] = [255, 255, 255]  # Connect cells
@@ -457,20 +402,6 @@ class Maze:
 
         raise Exception("No solution found")
 
-    @staticmethod
-    def __s_push(stack, item):
-        """Pushes item into spaghetti stack"""
-        return item, stack
-
-    @staticmethod
-    def __s_stack_to_list(stack):
-        """Converts spaghetti stack into list"""
-        l = []
-        while stack:
-            item, stack = stack
-            l.append(item)
-        return l[::-1]
-
     def __s_enqueue(self, deque, visited_cells):
         """Queues next cells"""
         cell = deque.popleft()
@@ -479,136 +410,24 @@ class Maze:
             tx, ty, bx, by = direction(x, y)
             if visited_cells[bx, by, 0] == 255:  # Check if unvisited
                 visited_cells[bx, by] = visited_cells[tx, ty] = [0, 0, 0]  # Mark as visited
-                deque.append(Maze.__s_push(cell, (tx, ty)))
+                deque.append(stack_push(cell, (tx, ty)))
         return deque  # Return deque with enqueued cells
 
     def __s_breadth_first_search(self, start, end):
         """Solves maze with breadth-first search"""
         visited_cells = self.maze.copy()  # List of visited cells, value of visited cell is [0, 0, 0]
         deque = deque_()  # List of cells [cell, ...]
-        cell = ()  # Tuple of current cell with according stack ((x, y), stack)
+        cell = stack_empty()  # Tuple of current cell with according stack ((x, y), stack)
 
         x, y = start
-        cell = Maze.__s_push(cell, (x, y))
+        cell = stack_push(cell, (x, y))
         deque.append(cell)
         visited_cells[x, y] = [0, 0, 0]  # Mark as visited
 
         while deque:
             deque = self.__s_enqueue(deque, visited_cells)
             if deque[0][0] == end:  # Stop if end has been found
-                cell = Maze.__s_push(deque[0], end)  # Push end into cell
-                return self.__s_draw_path(Maze.__s_stack_to_list(cell), complete=False)
+                cell = stack_push(deque[0], end)  # Push end into cell
+                return self.__s_draw_path(stack_to_list(cell), complete=False)
 
         raise Exception("No solution found")
-
-    def save_maze_as_png(self, file_name="maze.png", scale=3):
-        """Saves maze as png"""
-        if self.maze is None:
-            raise Exception("Maze is not assigned\n"
-                            "Use \"create\" or \"load_maze\" method to create or load a maze")
-
-        Image.fromarray(Maze.__upscale(self.maze, scale), "RGB").save(file_name, "png")
-
-    def save_maze_as_json(self, file_name="maze.json", indent=0):
-        """Saves maze as json"""
-        if self.maze is None:
-            raise Exception("Maze is not assigned\n"
-                            "Use \"create\" or \"load_maze\" method to create or load a maze")
-
-        with open(file_name, "w") as outfile:
-            if indent == 0:
-                dump(self.maze.tolist(), outfile)
-            else:
-                dump(self.maze.tolist(), outfile, indent=indent)
-
-    def save_solution_as_png(self, file_name="solution.png", scale=3):
-        """Saves solution as png"""
-        if self.solution is None:
-            raise Exception("Solution is not assigned\n"
-                            "Use \"solve\" method to solve a maze")
-
-        Image.fromarray(Maze.__upscale(self.solution, scale), "RGB").save(file_name, "png")
-
-    def save_solution_as_json(self, file_name="solution.json", indent=0):
-        """Saves solution as json"""
-        if self.solution is None:
-            raise Exception("Solution is not assigned\n"
-                            "Use \"solve\" method to solve a maze")
-
-        with open(file_name, "w") as outfile:
-            if indent == 0:
-                dump(self.solution.tolist(), outfile)
-            else:
-                dump(self.solution.tolist(), outfile, indent=indent)
-
-    def load_maze_from_png(self, file_name="maze.png"):
-        """Loads maze from png"""
-        if not isfile(file_name):
-            raise Exception("{0} does not exist".format(file_name))
-
-        self.maze = Maze.__downscale(np.array(Image.open(file_name)))
-
-    def load_maze_from_json(self, file_name="maze.json"):
-        """Loads maze from json"""
-        if not isfile(file_name):
-            raise Exception("{0} does not exist".format(file_name))
-
-        with open(file_name) as data_file:
-            self.maze = np.array(load(data_file))
-
-    def load_solution_from_png(self, file_name="solution.png"):
-        """Loads solution from png"""
-        if not isfile(file_name):
-            raise Exception("{0} does not exist".format(file_name))
-
-        self.solution = Maze.__downscale(np.array(Image.open(file_name)))
-
-    def load_solution_from_json(self, file_name="solution.json"):
-        """Loads solution from json"""
-        if not isfile(file_name):
-            raise Exception("{0} does not exist".format(file_name))
-
-        with open(file_name) as data_file:
-            self.solution = np.array(load(data_file))
-
-    @staticmethod
-    def __upscale(maze, scale):
-        """Upscales maze"""
-        if not isinstance(maze, np.ndarray):
-            maze = np.array(maze)  # Make sure maze is a numpy array
-        if scale <= 1:
-            return maze
-        row_count, col_count = len(maze), len(maze[0])
-        result = np.zeros((scale * row_count, scale * col_count, 3), dtype=np.uint8)
-
-        for x in range(0, row_count):
-            for y in range(0, col_count):
-                for i in range(0, scale):
-                    for j in range(0, scale):
-                        result[scale * x + i, scale * y + j] = maze[x, y]
-        return result
-
-    @staticmethod
-    def __downscale(maze):
-        """Downscales maze"""
-
-        def get_scale(maze_):
-            """Calculates scale of maze"""
-            for x_ in range(1, len(maze_)):
-                for y_ in range(0, len(maze_[0])):
-                    if maze_[x_, y_, 0] != 0:
-                        return x_
-
-        if not isinstance(maze, np.ndarray):
-            maze = np.array(maze)  # Make sure maze is a numpy array
-        scale = get_scale(maze)
-        if scale <= 1:
-            return maze
-
-        row_count, col_count = len(maze) // scale, len(maze[0]) // scale
-        result = np.zeros((row_count, col_count, 3), dtype=np.uint8)
-
-        for x in range(0, row_count):
-            for y in range(0, col_count):
-                result[x, y] = maze[x * scale, y * scale]
-        return result

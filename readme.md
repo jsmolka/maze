@@ -28,6 +28,9 @@ The code above creates the following pictures:
 - Depth-first search
 - Breadth-first search
 
+## How to install
+Simply go into the ```setup.py``` directory and run ```pip install .``` to install the package.
+
 ## Requirements
 - NumPy
 - Pillow
