@@ -8,8 +8,8 @@ from .helper import upscale, downscale
 
 class MazeBase:
     """
-    This class contains all common functions between the Maze and CMaze class.
-    Functions for creating and solving mazes are later defined in the acutal classes.
+    This class contains all common functions of the Maze and CMaze classes.
+    Functions for creating and solving mazes are later defined in the actual classes.
     """
     def __init__(self):
         """Constructor"""
