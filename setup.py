@@ -1,4 +1,4 @@
-from distutils.core import setup
+from setuptools import setup, find_packages
 
 
 def get_version():
@@ -11,7 +11,14 @@ def get_version():
 setup(
     name="maze",
     version=get_version(),
-    description="Create and solve mazes in Python",
+    description="Create and solve mazes in Python.",
     author="Julian Smolka",
-    packages=["maze"]
+    packages=["maze"],
+    package_data={
+        "maze": [
+            "lib/*.so",
+            "src/*.c",
+            "src/*.h"
+        ]
+    }
 )
