@@ -2,6 +2,8 @@
 
 /* Define global variables */
 uint8_t* maze;
+directions_t* c_dir_one;
+directions_b_t* dir_two;
 size_t row_count_with_walls;
 size_t col_count_with_walls;
 size_t max_index;
@@ -30,7 +32,6 @@ walk_t c_walk(index_t idx)
     w.idx = idx;
     w.walking = true;
 
-    directions_b_t* dir_two = get_dir_two();
     shuffle(dir_two);
     for (size_t i = 0; i < 4; i++)  /* Check adjacent cells randomly */
     {
@@ -40,18 +41,15 @@ walk_t c_walk(index_t idx)
             mark_visited(idc.idx1);
             mark_visited(idc.idx2);
             w.idx = idc.idx1;
-            free(dir_two);
             return w;  /* Return new index and continue walking */
         }
     }
     w.walking = false;
-    free(dir_two);
     return w;  /* Return old index and stop walking */
 }
 
 index_t c_backtrack(stack_t* stack)
 {
-    directions_t* c_dir_one = get_c_dir_one();
     while (!stack_empty(stack))
     {
         index_t idx = (index_t)stack_pop(stack);
@@ -60,12 +58,10 @@ index_t c_backtrack(stack_t* stack)
             index_t tidx = c_dir_one[i](idx);
             if (!out_ouf_bounds(tidx) && maze[tidx] == 0)  /* Check if unvisited */
             {
-                free(c_dir_one);
                 return idx;  /* Return index with unvisited neighbour */
             }
         }
     }
-    free(c_dir_one);
     return -1;  /* Return stop values if stack is empty */
 }
 
@@ -77,6 +73,8 @@ void recursive_backtracking(uint8_t* array, size_t idx, size_t row_count, size_t
     maze = array;
 
     setup_directions(col_count_with_walls);
+    c_dir_one = get_c_dir_one();
+    dir_two = get_dir_two();
     srand(time(NULL));  /* Seed rand with time */
     stack_t* stack = stack_new();
 
@@ -94,5 +92,7 @@ void recursive_backtracking(uint8_t* array, size_t idx, size_t row_count, size_t
         }
         w.idx = c_backtrack(stack);
     }
+    free(c_dir_one);
+    free(dir_two);
     free(stack);
 }
