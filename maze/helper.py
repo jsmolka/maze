@@ -28,6 +28,11 @@ def stack_to_list(stack):
     return l[::-1]
 
 
+def color(offset, iteration):
+    """Returns color for current iteration"""
+    return [0 + (iteration * offset), 0, 255 - (iteration * offset)]
+
+
 def upscale(maze, scale):
     """Upscales maze"""
     if not isinstance(maze, np.ndarray):

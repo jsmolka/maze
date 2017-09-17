@@ -3,7 +3,7 @@ from collections import deque as deque_
 from random import randint, getrandbits, shuffle
 
 from .algorithm import Algorithm
-from .helper import shuffled, stack_empty, stack_push, stack_to_list
+from .helper import shuffled, stack_empty, stack_push, stack_to_list, color
 from .base import MazeBase
 
 
@@ -341,26 +341,17 @@ class Maze(MazeBase):
             raise Exception("Wrong algorithm\n"
                             "Use \"Algorithm.Solve.<algorithm>\" to choose an algorithm")
 
-    def __s_draw_path(self, stack, complete=True):
+    def __s_draw_path(self, stack):
         """Draws path in solution"""
-
-        def color(offset_, iteration):
-            """Returns color for current iteration"""
-            return [0 + (iteration * offset_), 0, 255 - (iteration * offset_)]
-
-        if complete:  # Stack contains all cells of the path
-            offset = 255 / len(stack)
-            for i in range(0, len(stack)):
-                self.solution[tuple(stack[i])] = color(offset, i)
-        else:  # Stack contains every second cell of the path
-            offset = 255 / (2 * len(stack))
-            for i in range(0, len(stack) - 1):
-                x1, y1 = tuple(stack[i])
-                x2, y2 = tuple(stack[i + 1])
-                self.solution[x1, y1] = color(offset, 2 * i)
-                x3, y3 = int((x1 + x2) / 2), int((y1 + y2) / 2)
-                self.solution[x3, y3] = color(offset, 2 * i + 1)
-            self.solution[tuple(stack[-1])] = color(offset, 2 * (len(stack) - 1))
+        # Stack contains every second cell of the path
+        offset = 255 / (2 * len(stack))
+        for i in range(0, len(stack) - 1):
+            x1, y1 = tuple(stack[i])
+            x2, y2 = tuple(stack[i + 1])
+            x3, y3 = int((x1 + x2) / 2), int((y1 + y2) / 2)
+            self.solution[x1, y1] = color(offset, 2 * i)
+            self.solution[x3, y3] = color(offset, 2 * i + 1)
+        self.solution[tuple(stack[-1])] = color(offset, 2 * (len(stack) - 1))
 
     def __s_walk(self, x, y, stack, visited_cells):
         """Walks over maze"""
@@ -397,7 +388,7 @@ class Maze(MazeBase):
             while walking:
                 x, y, stack, visited_cells, walking = self.__s_walk(x, y, stack, visited_cells)
                 if (x, y) == end:  # Stop if end has been found
-                    return self.__s_draw_path(stack, complete=False)
+                    return self.__s_draw_path(stack)
             x, y, stack = self.__s_backtrack(stack, visited_cells)
 
         raise Exception("No solution found")
@@ -428,6 +419,6 @@ class Maze(MazeBase):
             deque = self.__s_enqueue(deque, visited_cells)
             if deque[0][0] == end:  # Stop if end has been found
                 cell = stack_push(deque[0], end)  # Push end into cell
-                return self.__s_draw_path(stack_to_list(cell), complete=False)
+                return self.__s_draw_path(stack_to_list(cell))
 
         raise Exception("No solution found")
