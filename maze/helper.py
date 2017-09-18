@@ -33,6 +33,19 @@ def color(offset, iteration):
     return [0 + (iteration * offset), 0, 255 - (iteration * offset)]
 
 
+def draw_path(solution, stack):
+    """Draws path in solution"""
+    # Stack contains every second cell of the path
+    offset = 255 / (2 * len(stack))
+    for i in range(0, len(stack) - 1):
+        x1, y1 = tuple(stack[i])
+        x2, y2 = tuple(stack[i + 1])
+        x3, y3 = int((x1 + x2) / 2), int((y1 + y2) / 2)
+        solution[x1, y1] = color(offset, 2 * i)
+        solution[x3, y3] = color(offset, 2 * i + 1)
+    solution[tuple(stack[-1])] = color(offset, 2 * (len(stack) - 1))
+
+
 def upscale(maze, scale):
     """Upscales maze"""
     if not isinstance(maze, np.ndarray):

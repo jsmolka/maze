@@ -3,7 +3,7 @@ from collections import deque as deque_
 from random import randint, getrandbits, shuffle
 
 from .algorithm import Algorithm
-from .helper import shuffled, stack_empty, stack_push, stack_to_list, color
+from .helper import shuffled, stack_empty, stack_push, stack_to_list, draw_path
 from .base import MazeBase
 
 
@@ -341,27 +341,14 @@ class Maze(MazeBase):
             raise Exception("Wrong algorithm\n"
                             "Use \"Algorithm.Solve.<algorithm>\" to choose an algorithm")
 
-    def __s_draw_path(self, stack):
-        """Draws path in solution"""
-        # Stack contains every second cell of the path
-        offset = 255 / (2 * len(stack))
-        for i in range(0, len(stack) - 1):
-            x1, y1 = tuple(stack[i])
-            x2, y2 = tuple(stack[i + 1])
-            x3, y3 = int((x1 + x2) / 2), int((y1 + y2) / 2)
-            self.solution[x1, y1] = color(offset, 2 * i)
-            self.solution[x3, y3] = color(offset, 2 * i + 1)
-        self.solution[tuple(stack[-1])] = color(offset, 2 * (len(stack) - 1))
-
-    def __s_walk(self, x, y, stack, visited_cells):
+    def __s_walk(self, x, y, visited_cells):
         """Walks over maze"""
         for direction in self.__dir_two:  # Check adjacent cells
             tx, ty, bx, by = direction(x, y)
             if visited_cells[bx, by, 0] == 255:  # Check if unvisited
                 visited_cells[bx, by] = visited_cells[tx, ty] = [0, 0, 0]  # Mark as visited
-                stack.append((tx, ty))
-                return tx, ty, stack, visited_cells, True  # Return new cell and continue walking
-        return x, y, stack, visited_cells, False  # Return old cell and stop walking
+                return tx, ty, visited_cells, True  # Return new cell and continue walking
+        return x, y, visited_cells, False  # Return old cell and stop walking
 
     def __s_backtrack(self, stack, visited_cells):
         """Backtracks stacks"""
@@ -370,7 +357,6 @@ class Maze(MazeBase):
             for direction in self.__s_dir_one:  # Check adjacent cells
                 tx, ty = direction(x, y)
                 if visited_cells[tx, ty, 0] == 255:  # Check if unvisited
-                    stack.append((x, y))
                     return x, y, stack  # Return cell with unvisited neighbour
         return None, None, None  # Return stop values if stack is empty and no new cell was found
 
@@ -380,15 +366,15 @@ class Maze(MazeBase):
         stack = []  # List of visited cells [(x, y), ...]
 
         x, y = start
-        stack.append((x, y))
         visited_cells[x, y] = [0, 0, 0]  # Mark as visited
 
         while x:
             walking = True
             while walking:
-                x, y, stack, visited_cells, walking = self.__s_walk(x, y, stack, visited_cells)
+                stack.append((x, y))
                 if (x, y) == end:  # Stop if end has been found
-                    return self.__s_draw_path(stack)
+                    return draw_path(self.solution, stack)
+                x, y, visited_cells, walking = self.__s_walk(x, y, visited_cells)
             x, y, stack = self.__s_backtrack(stack, visited_cells)
 
         raise Exception("No solution found")
@@ -419,6 +405,6 @@ class Maze(MazeBase):
             deque = self.__s_enqueue(deque, visited_cells)
             if deque[0][0] == end:  # Stop if end has been found
                 cell = stack_push(deque[0], end)  # Push end into cell
-                return self.__s_draw_path(stack_to_list(cell))
+                return draw_path(self.solution, stack_to_list(cell))
 
         raise Exception("No solution found")
