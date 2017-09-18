@@ -4,13 +4,16 @@
 #include <stdlib.h>
 
 /* Define types */
-typedef int index_t;
+typedef long index_t;
+
 typedef struct indices_s
 {
     index_t idx1;
     index_t idx2;
 } indices_t;
+
 typedef index_t (*directions_t)(index_t);
+
 typedef indices_t (*directions_b_t)(index_t);
 
 /* Define direction functions */

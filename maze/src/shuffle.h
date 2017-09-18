@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include "directions.h"
 
-/* Seed with srand(time(NULL)) at startup */
+/* Define functions */
 void shuffle(directions_b_t* array);
 
 #endif

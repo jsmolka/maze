@@ -9,12 +9,14 @@
 #include "stack.h"
 #include "shuffle.h"
 
+/* Define types */
 typedef struct walk_s
 {
     index_t idx;
     bool walking;
 } walk_t;
 
-void recursive_backtracking(uint8_t* array, size_t idx, size_t row_count, size_t col_count);
+/* Define functions */
+void recursive_backtracking(uint8_t* input, uint32_t idx, size_t row_count, size_t col_count);
 
 #endif

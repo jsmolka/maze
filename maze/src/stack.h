@@ -4,19 +4,25 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-struct stack_frame_s
+#include "directions.h"
+
+/* Define types */
+typedef struct stack_frame_s
 {
   struct stack_frame_s* next;
-  int* data;
-};
+  index_t* idx;
+} stack_frame_t;
+
 typedef struct stack_s
 {
-  struct stack_frame_s* top;
+  stack_frame_t* top;
 } stack_t;
 
+/* Define functions */
 stack_t* stack_new();
 bool stack_empty(stack_t* stack);
-int* stack_pop(stack_t* stack);
-void stack_push(stack_t* stack, int* data);
+long stack_size(stack_t* stack);
+index_t stack_pop(stack_t* stack);
+void stack_push(stack_t* stack, index_t idx);
 
 #endif
