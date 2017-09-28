@@ -4,7 +4,6 @@ from random import randint
 from os.path import dirname, isfile
 
 from .base import MazeBase
-from .helper import draw_path
 
 class CMaze(MazeBase):
     def __init__(self):
@@ -15,17 +14,16 @@ class CMaze(MazeBase):
             raise Exception("C library does not exist")
 
         dll = cdll.LoadLibrary(library)
-        array_pointer_8 = np.ctypeslib.ndpointer(c_uint8, flags="C_CONTIGUOUS")
-        array_pointer_32 = np.ctypeslib.ndpointer(c_uint32, flags="C_CONTIGUOUS")
+        array_pointer = np.ctypeslib.ndpointer(c_uint8, flags="C_CONTIGUOUS")
 
         # Define functions
         self.__c_resursive_backtracking = dll.recursive_backtracking
         self.__c_resursive_backtracking.argtypes = [
-            array_pointer_8, c_size_t, c_size_t, c_size_t
+            array_pointer, c_size_t, c_size_t, c_uint32
         ]
         self.__s_depth_first_search = dll.depth_first_search
         self.__s_depth_first_search.argtypes = [
-            array_pointer_8, array_pointer_32, c_size_t, c_uint32, c_uint32
+            array_pointer, array_pointer, c_size_t, c_uint32, c_uint32
         ]
 
     def create(self, row_count, col_count):
@@ -42,10 +40,7 @@ class CMaze(MazeBase):
 
         self.maze = np.zeros(row_count_with_walls * col_count_with_walls, dtype=np.uint8)
         self.__c_resursive_backtracking(
-            self.maze,
-            index,
-            row_count,
-            col_count
+            self.maze, row_count, col_count, index
         )
         self.maze = self.maze.reshape((row_count_with_walls, col_count_with_walls, 1))
         self.maze = self.maze.repeat(3, axis=2)
@@ -79,21 +74,11 @@ class CMaze(MazeBase):
         start = start[0] * self.col_count_with_walls + start[1]
         end = end[0] * self.col_count_with_walls + end[1]
 
-        stack = np.zeros(self.row_count_with_walls * self.col_count_with_walls, dtype=np.uint32)
+        self.solution = self.maze.copy().flatten()
         self.__s_depth_first_search(
-            self.maze[:, :, ::3].flatten(),
-            stack,
-            self.col_count,
-            start,
-            end
+            self.maze[:, :, ::3].flatten(), self.solution, self.col_count, start, end
         )
-        stack = np.trim_zeros(stack)  # Remove trailing zeros
-        if len(stack) == 0:
-            raise Exception("No solution found")
-        stack = stack.reshape((len(stack) // 2, 2))
-
-        self.solution = self.maze.copy()
-        draw_path(self.solution, stack)
+        self.solution = self.solution.reshape((self.row_count_with_walls, self.col_count_with_walls, 3))
 
 
     def __s_depth_first_search(self):

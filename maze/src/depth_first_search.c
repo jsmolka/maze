@@ -43,21 +43,34 @@ index_t s_backtrack(stack_t* stack)
     return -1;  /* Return stop values if stack is empty */
 }
 
-void convert_stack(stack_t* stack, uint32_t* output)
+void assign_color(uint8_t* output, index_t idx, size_t iteration, float offset)
 {
-    size_t size = 2 * stack_size(stack);
-
-    for (size_t i = size; i > 0; i -= 2)
-    {
-        index_t idx = stack_pop(stack);
-        uint32_t y = idx % col_count_with_walls;
-        uint32_t x = (idx - y) / col_count_with_walls;
-        output[i - 1] = x;
-        output[i] = y;
-    }
+    output[idx] = (int)255 - iteration * offset;
+    output[idx + 1] = 0;
+    output[idx + 2] = (int)0 + iteration * offset;
 }
 
-void depth_first_search(uint8_t* input, uint32_t* output, size_t col_count, uint32_t start, uint32_t end)
+void draw_path(stack_t* stack, uint8_t* output)
+{
+    size_t size = stack_size(stack);
+    index_t* index_stack = malloc(size * sizeof(index_t));
+    for (size_t i = 0; i < size; i++)
+    {
+        index_stack[i] = 3 * stack_pop(stack);  /* Convert stack into array */
+    }
+
+    float offset = (float)255 / (2 * size);
+    for (size_t i = 0; i < size - 1; i ++)  /* Draw path */
+    {
+        index_t idx1 = index_stack[i];
+        index_t idx2 = (idx1 + index_stack[i + 1]) / 2;
+        assign_color(output, idx1, 2 * i, offset);
+        assign_color(output, idx2, 2 * i + 1, offset);
+    }
+    assign_color(output, index_stack[size - 1], 2 * (size - 1), offset);
+}
+
+void depth_first_search(uint8_t* input, uint8_t* output, size_t col_count, index_t start, index_t end)
 {
     col_count_with_walls = 2 * col_count + 1;
     maze = input;
@@ -79,7 +92,7 @@ void depth_first_search(uint8_t* input, uint32_t* output, size_t col_count, uint
             stack_push(stack, w.idx);
             if (w.idx == end)
             {
-                return convert_stack(stack, output);
+                return draw_path(stack, output);
             }
             w = s_walk(w.idx);
         }

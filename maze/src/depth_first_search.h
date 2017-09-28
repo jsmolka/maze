@@ -13,6 +13,6 @@ typedef struct walk_s
     bool walking;
 } walk_t;
 
-void depth_first_search(uint8_t* input, uint32_t* output, size_t col_count, uint32_t start, uint32_t end);
+void depth_first_search(uint8_t* input, uint8_t* output, size_t col_count, index_t start, index_t end);
 
 #endif

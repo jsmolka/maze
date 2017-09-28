@@ -2,9 +2,10 @@
 #define DIRECTIONS_H
 
 #include <stdlib.h>
+#include <stdint.h>
 
 /* Define types */
-typedef long index_t;
+typedef uint32_t index_t;
 
 typedef struct indices_s
 {
