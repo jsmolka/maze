@@ -11,7 +11,7 @@ index_t max_index;
 bool out_ouf_bounds(index_t idx)
 {
     /* Check if index is out of bounds or if y is even */
-    if (idx < 0 || idx >= max_index || (idx % col_count_with_walls) % 2 == 0)
+    if (idx >= max_index || (idx % col_count_with_walls) % 2 == 0)
     {
         return true;
     }

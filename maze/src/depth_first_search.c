@@ -62,10 +62,9 @@ void draw_path(stack_t* stack, uint8_t* output)
     float offset = (float)255 / (2 * size);
     for (size_t i = 0; i < size - 1; i ++)  /* Draw path */
     {
-        index_t idx1 = index_stack[i];
-        index_t idx2 = (idx1 + index_stack[i + 1]) / 2;
-        assign_color(output, idx1, 2 * i, offset);
-        assign_color(output, idx2, 2 * i + 1, offset);
+        index_t idx = (index_stack[i] + index_stack[i + 1]) / 2;
+        assign_color(output, index_stack[i], 2 * i, offset);
+        assign_color(output, idx, 2 * i + 1, offset);
     }
     assign_color(output, index_stack[size - 1], 2 * (size - 1), offset);
 }

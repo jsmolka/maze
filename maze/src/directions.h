@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 /* Define types */
-typedef uint32_t index_t;
+typedef uint32_t index_t;  /* Use unsigned integer to prevent negative values */
 
 typedef struct indices_s
 {
