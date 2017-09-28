@@ -59,7 +59,7 @@ index_t c_backtrack(stack_t* stack)
     return -1;  /* Return stop values if stack is empty */
 }
 
-void recursive_backtracking(uint8_t* input, size_t idx, size_t row_count, size_t col_count)
+void recursive_backtracking(uint8_t* input, size_t row_count, size_t col_count, index_t idx)
 {
     row_count_with_walls = 2 * row_count + 1;
     col_count_with_walls = 2 * col_count + 1;

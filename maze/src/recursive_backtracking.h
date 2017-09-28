@@ -17,6 +17,6 @@ typedef struct walk_s
 } walk_t;
 
 /* Define functions */
-void recursive_backtracking(uint8_t* input, uint32_t idx, size_t row_count, size_t col_count);
+void recursive_backtracking(uint8_t* input, size_t row_count, size_t col_count, index_t idx);
 
 #endif
