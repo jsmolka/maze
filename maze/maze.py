@@ -370,7 +370,7 @@ class Maze(MazeBase):
                             "Use \"Algorithm.Solve.<algorithm>\" to choose an algorithm")
 
     def __s_depth_first_search_c(self, start, end):
-        """Solves maze with depth-first search"""
+        """Solves maze with depth-first search in C"""
         dll = cdll.LoadLibrary(dirname(__file__) + "\\lib\\cmaze.so")
         array_pointer = np.ctypeslib.ndpointer(c_uint8, flags="C_CONTIGUOUS")
 
