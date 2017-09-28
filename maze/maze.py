@@ -1,5 +1,7 @@
 import numpy as np
 from collections import deque as deque_
+from ctypes import cdll, c_size_t, c_uint8, c_uint32
+from os.path import dirname
 from random import randint, getrandbits, shuffle
 
 from .algorithm import Algorithm
@@ -54,7 +56,9 @@ class Maze(MazeBase):
 
         self.maze = np.zeros((2 * row_count + 1, 2 * col_count + 1, 3), dtype=np.uint8)
 
-        if algorithm == Algorithm.Create.BACKTRACKING:
+        if algorithm == Algorithm.Create.C:
+            self.__c_recursive_backtracking_c()
+        elif algorithm == Algorithm.Create.BACKTRACKING:
             self.__c_recursive_backtracking()
         elif algorithm == Algorithm.Create.HUNT:
             self.__c_hunt_and_kill()
@@ -69,6 +73,28 @@ class Maze(MazeBase):
         else:
             raise Exception("Wrong algorithm\n"
                             "Use \"Algorithm.Create.<algorithm>\" to choose an algorithm")
+
+    def __c_recursive_backtracking_c(self):
+        """Creates maze with recursive backtracking algorithm in C"""
+        dll = cdll.LoadLibrary(dirname(__file__) + "\\lib\\cmaze.so")
+        array_pointer = np.ctypeslib.ndpointer(c_uint8, flags="C_CONTIGUOUS")
+
+        dll.recursive_backtracking.argtypes = [
+            array_pointer, c_size_t, c_size_t, c_uint32
+        ]
+        row_count, col_count = self.row_count, self.col_count
+        row_count_with_walls, col_count_with_walls = self.row_count_with_walls, self.col_count_with_walls
+
+        x = 2 * randint(0, row_count - 1) + 1
+        y = 2 * randint(0, col_count - 1) + 1
+        index = x * col_count_with_walls + y
+
+        self.maze = self.maze[:, :, ::3].flatten()
+        dll.recursive_backtracking(
+            self.maze, row_count, col_count, index
+        )
+        self.maze = self.maze.reshape((row_count_with_walls, col_count_with_walls, 1))
+        self.maze = self.maze.repeat(3, axis=2)
 
     def __c_walk(self, x, y):
         """Walks over maze"""
@@ -333,13 +359,33 @@ class Maze(MazeBase):
 
         self.solution = self.maze.copy()
 
-        if algorithm == Algorithm.Solve.DEPTH:
+        if algorithm == Algorithm.Solve.C:
+            self.__s_depth_first_search_c(start, end)
+        elif algorithm == Algorithm.Solve.DEPTH:
             self.__s_depth_first_search(start, end)
         elif algorithm == Algorithm.Solve.BREADTH:
             self.__s_breadth_first_search(start, end)
         else:
             raise Exception("Wrong algorithm\n"
                             "Use \"Algorithm.Solve.<algorithm>\" to choose an algorithm")
+
+    def __s_depth_first_search_c(self, start, end):
+        """Solves maze with depth-first search"""
+        dll = cdll.LoadLibrary(dirname(__file__) + "\\lib\\cmaze.so")
+        array_pointer = np.ctypeslib.ndpointer(c_uint8, flags="C_CONTIGUOUS")
+
+        dll.depth_first_search.argtypes = [
+            array_pointer, array_pointer, c_size_t, c_uint32, c_uint32
+        ]
+
+        start = start[0] * self.col_count_with_walls + start[1]
+        end = end[0] * self.col_count_with_walls + end[1]
+
+        self.solution = self.solution.flatten()
+        dll.depth_first_search(
+            self.maze[:, :, ::3].flatten(), self.solution, self.col_count, start, end
+        )
+        self.solution = self.solution.reshape((self.row_count_with_walls, self.col_count_with_walls, 3))
 
     def __s_walk(self, x, y, visited_cells):
         """Walks over maze"""

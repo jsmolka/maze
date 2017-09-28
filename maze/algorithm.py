@@ -7,6 +7,7 @@ class Algorithm:
     algorithms used in the Maze class.
     """
     class Create(Enum):
+        C = "Recursive backtracking algorithm C"
         BACKTRACKING = "Recursive backtracking algorithm"
         HUNT = "Hunt and kill algorithm"
         ELLER = "Eller's algorithm"
@@ -15,5 +16,6 @@ class Algorithm:
         KRUSKAL = "Kruskal's algorithm"
 
     class Solve(Enum):
+        C = "Depth-first search C"
         DEPTH = "Depth-first search"
         BREADTH = "Breadth-first search"
