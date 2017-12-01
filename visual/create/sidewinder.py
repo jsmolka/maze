@@ -75,11 +75,11 @@ def create_cells():
 def draw_cells():
     """Draws cells"""
     global finished, current_cells, last_cells, scale
+    fill(0, 255, 0)
     for x, y in current_cells:
-        fill(0, 255, 0)
         rect(y * scale, x * scale, scale, scale)
+    fill(255)
     for x, y in last_cells:
-        fill(255)
         rect(y * scale, x * scale, scale, scale)
     if finished:
         for x, y in current_cells:

@@ -76,15 +76,15 @@ def choose_edge():
 def draw_edge():
     """Draws edge"""
     global finished, current_edge, last_edge, scale
+    fill(0, 255, 0)
     for x, y in current_edge:
-        fill(0, 255, 0)
         rect(y * scale, x * scale, scale, scale)
+    fill(255)
     for x, y in last_edge:
-        fill(255)
         rect(y * scale, x * scale, scale, scale)
     if finished:
+        fill(255)
         for x, y in current_edge:
-            fill(255)
             rect(y * scale, x * scale, scale, scale)
         noLoop()
     current_edge, last_edge = [], current_edge
