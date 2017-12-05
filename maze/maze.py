@@ -2,10 +2,11 @@ import numpy as np
 from collections import deque as deque_
 from ctypes import cdll, c_size_t, c_uint8, c_uint32
 from os.path import dirname
+from PIL import Image
 from random import randint, getrandbits, shuffle
 
 from .algorithm import Algorithm
-from .helper import shuffled, stack_empty, stack_push, stack_to_list, draw_path
+from .util import shuffled, stack_empty, stack_push, stack_to_list, draw_path, maze_shape, purify
 from .base import MazeBase
 
 
@@ -121,6 +122,9 @@ class Maze(MazeBase):
 
         x = 2 * randint(0, self.row_count - 1) + 1
         y = 2 * randint(0, self.col_count - 1) + 1
+        while self.maze[x, y, 0] == 255:  # Loop for form function
+            x = 2 * randint(0, self.row_count - 1) + 1
+            y = 2 * randint(0, self.col_count - 1) + 1
         self.maze[x, y] = [255, 255, 255]  # Mark as visited
 
         while x:
@@ -454,3 +458,11 @@ class Maze(MazeBase):
                 return draw_path(self.solution, stack_to_list(cell))
 
         raise Exception("No solution found")
+
+    def shape(self, file_name, flip=True):
+        """Creates a maze around a shape"""
+        img = Image.open(file_name)
+        img = img.convert("L").convert("RGB")
+        self.maze = np.array(img)
+        self.maze = maze_shape(purify(self.maze, flip=flip))
+        self.__c_recursive_backtracking()

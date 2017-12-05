@@ -73,3 +73,25 @@ def downscale(maze):
         return maze
     else:
         return maze[::scale, ::scale]
+
+
+def maze_shape(array):
+    """Resizes an array to maze shape"""
+    shape = array.shape
+    return np.resize(array, (2 * (shape[0] // 2) + 1, 2 * (shape[1] // 2) + 1, 3))
+
+
+def purify(array, flip=False):
+    """Purifies white and black color"""
+    shape = array.shape
+    array.flatten()
+    if not flip:
+        array[array < 128] = 128
+        array[array > 128] = 254
+        array[array == 128] = 0
+    else:
+        array[array > 128] = 128
+        array[array < 128] = 254
+        array[array == 128] = 0
+    array.shape = shape
+    return array

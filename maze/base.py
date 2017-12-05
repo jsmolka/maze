@@ -2,7 +2,7 @@ import numpy as np
 from os.path import isfile
 from PIL import Image
 
-from .helper import upscale, downscale
+from .util import upscale, downscale
 
 
 class MazeBase:
