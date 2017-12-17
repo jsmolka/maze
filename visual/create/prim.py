@@ -1,6 +1,6 @@
 import numpy as np
+import random
 from pyprocessing import *
-from random import randint, shuffle
 
 # Configuration
 row_count = 35
@@ -38,8 +38,8 @@ def out_of_bounds(x, y):
     return True if x < 0 or y < 0 or x >= row_count_with_walls or y >= col_count_with_walls else False
 
 
-x = 2 * randint(0, row_count - 1) + 1
-y = 2 * randint(0, col_count - 1) + 1
+x = 2 * random.randint(0, row_count - 1) + 1
+y = 2 * random.randint(0, col_count - 1) + 1
 maze[x, y] = [255, 255, 255]  # Mark as visited
 
 # Add cells to frontier for random cell
@@ -53,14 +53,14 @@ for direction in c_dir_one:
 def shuffled(l):
     """Returns shuffled list"""
     result = l[:]
-    shuffle(result)
+    random.shuffle(result)
     return result
 
 
 def choose_cells():
     """Chooses cell from frontier"""
     global frontier, dir_two, finished, current_cells
-    x, y = frontier.pop(randint(0, len(frontier) - 1))
+    x, y = frontier.pop(random.randint(0, len(frontier) - 1))
 
     # Connect cells
     for direction in shuffled(dir_two):

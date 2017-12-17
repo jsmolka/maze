@@ -1,6 +1,6 @@
 import numpy as np
+import random
 from pyprocessing import *
-from random import getrandbits, randint
 
 # Configuration
 row_count = 35

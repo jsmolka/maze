@@ -1,6 +1,6 @@
 import numpy as np
+import random
 from pyprocessing import *
-from random import shuffle
 
 # Configuration
 row_count = 35
@@ -40,7 +40,7 @@ for x in range(1, row_count_with_walls - 1, 2):
         if not out_of_bounds(x, y + 2):
             edges.append((x, y + 1, "h"))  # Horizontal edge
 
-shuffle(edges)
+random.shuffle(edges)
 
 
 def choose_edge():

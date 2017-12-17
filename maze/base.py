@@ -1,8 +1,9 @@
 import numpy as np
-from os.path import isfile
+import enum
+import os
 from PIL import Image
 
-from .util import upscale, downscale
+import maze.util as util
 
 
 class MazeBase:
@@ -10,6 +11,22 @@ class MazeBase:
     This class contains all common functions of the Maze and CMaze classes.
     Functions for creating and solving mazes are later defined in the actual classes.
     """
+    class Create(enum.Enum):
+        """Enum for creation algorithms"""
+        C = "Recursive backtracking algorithm C"
+        BACKTRACKING = "Recursive backtracking algorithm"
+        HUNT = "Hunt and kill algorithm"
+        ELLER = "Eller's algorithm"
+        SIDEWINDER = "Sidewinder algorithm"
+        PRIM = "Prim's algorithm"
+        KRUSKAL = "Kruskal's algorithm"
+
+    class Solve(enum.Enum):
+        """Enum for solving algorithms"""
+        C = "Depth-first search C"
+        DEPTH = "Depth-first search"
+        BREADTH = "Breadth-first search"
+
     def __init__(self):
         """Constructor"""
         self.maze = None
@@ -51,7 +68,7 @@ class MazeBase:
             raise Exception("Maze is not assigned\n"
                             "Use \"create\" or \"load_maze\" method to create or load a maze")
 
-        Image.fromarray(upscale(self.maze, scale), "RGB").save(file_name, "png")
+        Image.fromarray(util.upscale(self.maze, scale), "RGB").save(file_name, "png")
 
     def save_solution_as_png(self, file_name="solution.png", scale=3):
         """Saves solution as png"""
@@ -59,18 +76,18 @@ class MazeBase:
             raise Exception("Solution is not assigned\n"
                             "Use \"solve\" method to solve a maze")
 
-        Image.fromarray(upscale(self.solution, scale), "RGB").save(file_name, "png")
+        Image.fromarray(util.upscale(self.solution, scale), "RGB").save(file_name, "png")
 
     def load_maze_from_png(self, file_name="maze.png"):
         """Loads maze from png"""
-        if not isfile(file_name):
+        if not os.path.isfile(file_name):
             raise Exception("{0} does not exist".format(file_name))
 
-        self.maze = downscale(np.array(Image.open(file_name)))
+        self.maze = util.downscale(np.array(Image.open(file_name)))
 
     def load_solution_from_png(self, file_name="solution.png"):
         """Loads solution from png"""
-        if not isfile(file_name):
+        if not os.path.isfile(file_name):
             raise Exception("{0} does not exist".format(file_name))
 
-        self.solution = downscale(np.array(Image.open(file_name)))
+        self.solution = util.downscale(np.array(Image.open(file_name)))

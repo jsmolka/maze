@@ -1,6 +1,6 @@
 import numpy as np
+import random
 from pyprocessing import *
-from random import getrandbits
 
 # Configuration
 row_count = 35
@@ -37,7 +37,7 @@ def create_row_stack():
         set_index += 1
 
     for y in range(1, col_count):  # Define other cells in ro
-        if bool(getrandbits(1)):  # Connect cells
+        if bool(random.getrandbits(1)):  # Connect cells
             if row_stack[y] != 0:  # Connect cell with previous cell
                 old_index = row_stack[y]
                 new_index = row_stack[y - 1]
@@ -109,7 +109,7 @@ def create_links():
     linked = False
     while not linked:  # Create at least one link for each set index
         for sub_set_item in sub_set_list:
-            if bool(getrandbits(1)):  # Create link
+            if bool(random.getrandbits(1)):  # Create link
                 linked = True
                 link_set, link_position = sub_set_item
 

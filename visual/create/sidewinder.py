@@ -1,6 +1,6 @@
 import numpy as np
+import random
 from pyprocessing import *
-from random import getrandbits, randint
 
 # Configuration
 row_count = 35
@@ -45,8 +45,8 @@ def create_cells():
     row_stack.append(y)
 
     if y != col_count_with_walls - 2:
-        if bool(getrandbits(1)):  # Create vertical link
-            index = randint(0, len(row_stack) - 1)
+        if bool(random.getrandbits(1)):  # Create vertical link
+            index = random.randint(0, len(row_stack) - 1)
             maze[x - 1, row_stack[index]] = [255, 255, 255]  # Mark as visited
             link = (x - 1, row_stack[index])
             row_stack = []  # Reset row stack
@@ -54,7 +54,7 @@ def create_cells():
             maze[x, y + 1] = [255, 255, 255]  # Mark as visited
             link = (x, y + 1)
     else:  # Create link if last cell
-        index = randint(0, len(row_stack) - 1)
+        index = random.randint(0, len(row_stack) - 1)
         maze[x - 1, row_stack[index]] = [255, 255, 255]
         link = (x - 1, row_stack[index])
 

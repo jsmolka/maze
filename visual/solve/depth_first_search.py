@@ -7,7 +7,7 @@ col_count = 35
 scale = 8
 start = 0  # Top left corner if zero
 end = 0  # Bottom right corner if zero
-create_algorithm = Algorithm.Create.BACKTRACKING
+create_algorithm = Maze.Create.BACKTRACKING
 
 # Define variables
 m = Maze()
@@ -139,7 +139,7 @@ def draw_cells():
 
 def setup():
     global row_count_with_walls, col_count_with_walls, scale
-    size(col_count_with_walls * scale, row_count_with_walls * scale, caption=Algorithm.Solve.DEPTH.value)
+    size(col_count_with_walls * scale, row_count_with_walls * scale, caption=Maze.Solve.DEPTH.value)
     background(0)
     noStroke()
     draw_maze()

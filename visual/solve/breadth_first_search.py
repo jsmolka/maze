@@ -1,5 +1,5 @@
 import numpy as np
-from collections import deque as deque_
+import collections
 from maze import *
 from pyprocessing import *
 
@@ -9,7 +9,7 @@ col_count = 35
 scale = 8
 start = 0  # Top left corner if zero
 end = 0  # Bottom right corner if zero
-create_algorithm = Algorithm.Create.BACKTRACKING
+create_algorithm = Maze.Create.BACKTRACKING
 
 # Define variables
 m = Maze()
@@ -18,7 +18,7 @@ row_count_with_walls = 2 * row_count + 1
 col_count_with_walls = 2 * col_count + 1
 
 visited_cells = m.maze.copy()  # List of visited cells, value of visited cell is [0, 0, 0]
-deque = deque_()  # List of cells with according stack [(x, y, stack), ...]
+deque = collections.deque()  # List of cells with according stack [(x, y, stack), ...]
 cell = ()  # Tuple of current cell with according stack ((x, y), stack)
 
 # Define start and end
@@ -133,7 +133,7 @@ def draw_cells():
 
 def setup():
     global row_count_with_walls, col_count_with_walls, scale
-    size(col_count_with_walls * scale, row_count_with_walls * scale, caption=Algorithm.Solve.BREADTH.value)
+    size(col_count_with_walls * scale, row_count_with_walls * scale, caption=Maze.Solve.BREADTH.value)
     background(0)
     noStroke()
     draw_maze()

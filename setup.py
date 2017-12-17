@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 
 def get_version():
@@ -13,7 +13,13 @@ setup(
     version=get_version(),
     description="Create and solve mazes in Python.",
     author="Julian Smolka",
-    packages=["maze"],
+    packages=[
+        "maze"
+    ],
+    install_requires=[
+        "numpy",
+        "Pillow"
+    ],
     package_data={
         "maze": [
             "lib/*.so",

@@ -1,11 +1,11 @@
 import numpy as np
-from random import shuffle
+import random
 
 
 def shuffled(l):
     """Returns shuffled list"""
     result = l[:]
-    shuffle(result)
+    random.shuffle(result)
     return result
 
 
@@ -21,11 +21,11 @@ def stack_push(stack, item):
 
 def stack_to_list(stack):
     """Converts spaghetti stack into list"""
-    l = []
+    lst = []
     while stack:
         item, stack = stack
-        l.append(item)
-    return l[::-1]
+        lst.append(item)
+    return lst[::-1]
 
 
 def color(offset, iteration):

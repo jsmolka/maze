@@ -1,6 +1,6 @@
 import numpy as np
+import random
 from pyprocessing import *
-from random import randint, shuffle
 
 # Configuration
 row_count = 35
@@ -12,8 +12,8 @@ row_count_with_walls = 2 * row_count + 1
 col_count_with_walls = 2 * col_count + 1
 maze = np.zeros((row_count_with_walls, col_count_with_walls, 3), dtype=np.uint8)
 
-x = 2 * randint(0, row_count - 1) + 1
-y = 2 * randint(0, col_count - 1) + 1
+x = 2 * random.randint(0, row_count - 1) + 1
+y = 2 * random.randint(0, col_count - 1) + 1
 maze[x, y] = [255, 255, 255]
 
 current_cells = []  # List of cells [(x, y), ...]
@@ -44,7 +44,7 @@ dir_two = [
 def shuffled(l):
     """Returns shuffled list"""
     result = l[:]
-    shuffle(result)
+    random.shuffle(result)
     return result
 
 
