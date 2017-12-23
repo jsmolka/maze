@@ -1,6 +1,10 @@
 import numpy as np
 import random
 
+class MazeException(Exception):
+    def __init__(self, e):
+        super(MazeException, self).__init__(e)
+
 
 def shuffled(l):
     """Returns shuffled list"""

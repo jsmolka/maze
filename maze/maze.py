@@ -22,7 +22,7 @@ class Maze(base.MazeBase):
     """
     def __init__(self):
         """Constructor"""
-        super().__init__()
+        super(Maze, self).__init__()
 
         self.__c_dir_one = [
             lambda x, y: (x + 2, y),
