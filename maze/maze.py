@@ -113,8 +113,8 @@ class Maze(base.MazeBase):
         img = Image.open(file_name)
         img = img.convert("L").convert("RGB")
         self.maze = np.array(img)
-        self.maze = util.maze_shape(util.purify(self.maze, flip=flip))
-        self.__c_recursive_backtracking()
+        self.maze = util.maze_shape(util.purify(self.maze, flip))
+        self.__c_prim()
 
     def __out_of_bounds(self, x, y):
         """Checks if indices are out of bounds"""
@@ -167,9 +167,6 @@ class Maze(base.MazeBase):
 
         x = 2 * random.randint(0, self.row_count - 1) + 1
         y = 2 * random.randint(0, self.col_count - 1) + 1
-        while self.maze[x, y, 0] == 255:  # Loop for form function
-            x = 2 * random.randint(0, self.row_count - 1) + 1
-            y = 2 * random.randint(0, self.col_count - 1) + 1
         self.maze[x, y] = [255, 255, 255]  # Mark as visited
 
         while x:
@@ -316,6 +313,9 @@ class Maze(base.MazeBase):
         # Start with random cell
         x = 2 * random.randint(0, self.row_count - 1) + 1
         y = 2 * random.randint(0, self.col_count - 1) + 1
+        while self.maze[x, y, 0] != 0:  # Loop for shape function
+            x = 2 * random.randint(0, self.row_count - 1) + 1
+            y = 2 * random.randint(0, self.col_count - 1) + 1
         self.maze[x, y] = [255, 255, 255]  # Mark as visited
 
         # Add cells to frontier for random cell

@@ -85,14 +85,13 @@ def maze_shape(array):
     return np.resize(array, (2 * (shape[0] // 2) + 1, 2 * (shape[1] // 2) + 1, 3))
 
 
-def purify(array, flip=False):
+def purify(array, flip):
     """Purifies white and black color"""
     shape = array.shape
     array.flatten()
     if not flip:
-        array[array < 128] = 128
-        array[array > 128] = 254
-        array[array == 128] = 0
+        array[array < 128] = 0
+        array[array >= 128] = 254
     else:
         array[array > 128] = 128
         array[array < 128] = 254
