@@ -1,1 +1,1 @@
-from .maze import *
+from maze.maze import *
