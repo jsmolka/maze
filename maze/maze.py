@@ -108,14 +108,6 @@ class Maze(base.MazeBase):
                 "Wrong algorithm\n"
                 "Use \"Algorithm.Solve.<algorithm>\" to choose an algorithm")
 
-    def shape(self, file_name, flip=True):
-        """Creates a maze around a shape"""
-        img = Image.open(file_name)
-        img = img.convert("L").convert("RGB")
-        self.maze = np.array(img)
-        self.maze = util.maze_shape(util.purify(self.maze, flip))
-        self.__c_prim()
-
     def __out_of_bounds(self, x, y):
         """Checks if indices are out of bounds"""
         return True if x < 0 or y < 0 or x >= self.row_count_with_walls or y >= self.col_count_with_walls else False
