@@ -11,14 +11,14 @@ import maze.base as base
 
 class Maze(base.MazeBase):
     """
-    This class contains the relevant create and solve Python functions.
+    This class contains the relevant create and solve Python functions
 
     Variable explanation:
-    __c_: functions / variables used in create
-    __s_: functions / variables used in solve
-    __c_dir_one: returns new x and y with a step length of 2
-    __s_dir_one: returns new x and y with a step length of 1
-    __dir_two: returns new and between x and y with a step length of 2
+    __c_        -- functions / variables used in create
+    __s_        -- functions / variables used in solve
+    __c_dir_one -- returns new x and y with a step length of 2
+    __s_dir_one -- returns new x and y with a step length of 1
+    __dir_two   -- returns new and between x and y with a step length of 2
     """
     def __init__(self):
         """Constructor"""
@@ -45,14 +45,10 @@ class Maze(base.MazeBase):
             lambda x, y: (x, y + 2, x, y + 1)
         ]
 
-    def __out_of_bounds(self, x, y):
-        """Checks if indices are out of bounds"""
-        return True if x < 0 or y < 0 or x >= self.row_count_with_walls or y >= self.col_count_with_walls else False
-
     def create(self, row_count, col_count, algorithm):
         """Creates maze"""
         if (row_count or col_count) <= 0:
-            raise Exception("Row or column count cannot be smaller than zero")
+            raise util.MazeException("Row or column count cannot be smaller than zero")
 
         self.maze = np.zeros((2 * row_count + 1, 2 * col_count + 1, 3), dtype=np.uint8)
 
@@ -71,8 +67,58 @@ class Maze(base.MazeBase):
         elif algorithm == Maze.Create.KRUSKAL:
             self.__c_kruskal()
         else:
-            raise Exception("Wrong algorithm\n"
-                            "Use \"Algorithm.Create.<algorithm>\" to choose an algorithm")
+            raise util.MazeException(
+                "Wrong algorithm\n"
+                "Use \"Maze.Create.<algorithm>\" to choose an algorithm")
+
+    def solve(self, start, end, algorithm):
+        """Solves maze"""
+        if self.maze is None:
+            raise util.MazeException(
+                "Maze is not assigned\n"
+                "Use \"create\" or \"load_maze\" method to create or load a maze")
+
+        if start == 0:
+            start = (0, 0)
+        if end == 0:
+            end = (self.row_count - 1, self.col_count - 1)
+
+        if not 0 <= start[0] < self.row_count:
+            raise util.MazeException("Start row value is out of range")
+        if not 0 <= start[1] < self.col_count:
+            raise util.MazeException("Start column value is out of range")
+        if not 0 <= end[0] < self.row_count:
+            raise util.MazeException("End row value is out of range")
+        if not 0 <= end[1] < self.col_count:
+            raise util.MazeException("End column value is out of range")
+
+        start = tuple([2 * x + 1 for x in start])
+        end = tuple([2 * x + 1 for x in end])
+
+        self.solution = self.maze.copy()
+
+        if algorithm == Maze.Solve.C:
+            self.__s_depth_first_search_c(start, end)
+        elif algorithm == Maze.Solve.DEPTH:
+            self.__s_depth_first_search(start, end)
+        elif algorithm == Maze.Solve.BREADTH:
+            self.__s_breadth_first_search(start, end)
+        else:
+            raise util.MazeException(
+                "Wrong algorithm\n"
+                "Use \"Algorithm.Solve.<algorithm>\" to choose an algorithm")
+
+    def shape(self, file_name, flip=True):
+        """Creates a maze around a shape"""
+        img = Image.open(file_name)
+        img = img.convert("L").convert("RGB")
+        self.maze = np.array(img)
+        self.maze = util.maze_shape(util.purify(self.maze, flip=flip))
+        self.__c_recursive_backtracking()
+
+    def __out_of_bounds(self, x, y):
+        """Checks if indices are out of bounds"""
+        return True if x < 0 or y < 0 or x >= self.row_count_with_walls or y >= self.col_count_with_walls else False
 
     def __c_recursive_backtracking_c(self):
         """Creates maze with recursive backtracking algorithm in C"""
@@ -337,41 +383,6 @@ class Maze(base.MazeBase):
                 for pos in set_to_xy[old_set]:
                     xy_to_set[pos] = new_set
 
-    def solve(self, start, end, algorithm):
-        """Solves maze"""
-        if self.maze is None:
-            raise Exception("Maze is not assigned\n"
-                            "Use \"create\" or \"load_maze\" method to create or load a maze")
-
-        if start == 0:
-            start = (0, 0)
-        if end == 0:
-            end = (self.row_count - 1, self.col_count - 1)
-
-        if not 0 <= start[0] < self.row_count:
-            raise Exception("Start row value is out of range")
-        if not 0 <= start[1] < self.col_count:
-            raise Exception("Start column value is out of range")
-        if not 0 <= end[0] < self.row_count:
-            raise Exception("End row value is out of range")
-        if not 0 <= end[1] < self.col_count:
-            raise Exception("End column value is out of range")
-
-        start = tuple([2 * x + 1 for x in start])
-        end = tuple([2 * x + 1 for x in end])
-
-        self.solution = self.maze.copy()
-
-        if algorithm == Maze.Solve.C:
-            self.__s_depth_first_search_c(start, end)
-        elif algorithm == Maze.Solve.DEPTH:
-            self.__s_depth_first_search(start, end)
-        elif algorithm == Maze.Solve.BREADTH:
-            self.__s_breadth_first_search(start, end)
-        else:
-            raise Exception("Wrong algorithm\n"
-                            "Use \"Algorithm.Solve.<algorithm>\" to choose an algorithm")
-
     def __s_depth_first_search_c(self, start, end):
         """Solves maze with depth-first search in C"""
         dll = ctypes.cdll.LoadLibrary(os.path.dirname(__file__) + "\\lib\\cmaze.so")
@@ -426,7 +437,7 @@ class Maze(base.MazeBase):
                 x, y, visited_cells, walking = self.__s_walk(x, y, visited_cells)
             x, y, stack = self.__s_backtrack(stack, visited_cells)
 
-        raise Exception("No solution found")
+        raise util.MazeException("No solution found")
 
     def __s_enqueue(self, deque, visited_cells):
         """Queues next cells"""
@@ -456,12 +467,4 @@ class Maze(base.MazeBase):
                 cell = util.stack_push(deque[0], end)  # Push end into cell
                 return util.draw_path(self.solution, util.stack_to_list(cell))
 
-        raise Exception("No solution found")
-
-    def shape(self, file_name, flip=True):
-        """Creates a maze around a shape"""
-        img = Image.open(file_name)
-        img = img.convert("L").convert("RGB")
-        self.maze = np.array(img)
-        self.maze = util.maze_shape(util.purify(self.maze, flip=flip))
-        self.__c_recursive_backtracking()
+        raise util.MazeException("No solution found")
