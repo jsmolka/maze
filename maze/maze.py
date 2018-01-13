@@ -3,7 +3,6 @@ import collections
 import ctypes
 import os
 import random
-from PIL import Image
 
 import maze.util as util
 import maze.base as base
@@ -110,7 +109,7 @@ class Maze(base.MazeBase):
 
     def __out_of_bounds(self, x, y):
         """Checks if indices are out of bounds"""
-        return True if x < 0 or y < 0 or x >= self.row_count_with_walls or y >= self.col_count_with_walls else False
+        return x < 0 or y < 0 or x >= self.row_count_with_walls or y >= self.col_count_with_walls
 
     def __c_recursive_backtracking_c(self):
         """Creates maze with recursive backtracking algorithm in C"""
