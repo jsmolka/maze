@@ -113,7 +113,7 @@ class Maze(base.MazeBase):
 
     def __c_recursive_backtracking_c(self):
         """Creates maze with recursive backtracking algorithm in C"""
-        dll = ctypes.cdll.LoadLibrary(os.path.dirname(__file__) + "\\lib\\cmaze.so")
+        dll = ctypes.cdll.LoadLibrary(os.path.dirname(__file__) + "\\lib\\maze32.dll")
         array_pointer = np.ctypeslib.ndpointer(ctypes.c_uint8, flags="C_CONTIGUOUS")
 
         dll.recursive_backtracking.argtypes = [
@@ -373,7 +373,7 @@ class Maze(base.MazeBase):
 
     def __s_depth_first_search_c(self, start, end):
         """Solves maze with depth-first search in C"""
-        dll = ctypes.cdll.LoadLibrary(os.path.dirname(__file__) + "\\lib\\cmaze.so")
+        dll = ctypes.cdll.LoadLibrary(os.path.dirname(__file__) + "\\lib\\maze32.dll")
         array_pointer = np.ctypeslib.ndpointer(ctypes.c_uint8, flags="C_CONTIGUOUS")
 
         dll.depth_first_search.argtypes = [

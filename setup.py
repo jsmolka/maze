@@ -22,9 +22,7 @@ setup(
     ],
     package_data={
         "maze": [
-            "lib/*.so",
-            "src/*.c",
-            "src/*.h"
+            "lib/*.dll"
         ]
     }
 )
