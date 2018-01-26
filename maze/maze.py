@@ -44,6 +44,21 @@ class Maze(base.MazeBase):
             lambda x, y: (x, y + 2, x, y + 1)
         ]
 
+        pth = os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib", "maze32.dll")
+        try:
+            self.__dll = ctypes.cdll.LoadLibrary(pth)
+            ndpointer = np.ctypeslib.ndpointer(ctypes.c_uint8, flags="C_CONTIGUOUS")
+
+            self.__dll.recursive_backtracking.argtypes = [
+                ndpointer, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_uint32
+            ]
+
+            self.__dll.depth_first_search.argtypes = [
+                ndpointer, ndpointer, ctypes.c_size_t, ctypes.c_uint32, ctypes.c_uint32
+            ]
+        except:
+            raise util.MazeException("maze32.dll not found in {0}".format(pth))
+
     def create(self, row_count, col_count, algorithm):
         """Creates maze"""
         if (row_count or col_count) <= 0:
@@ -113,12 +128,6 @@ class Maze(base.MazeBase):
 
     def __c_recursive_backtracking_c(self):
         """Creates maze with recursive backtracking algorithm in C"""
-        dll = ctypes.cdll.LoadLibrary(os.path.dirname(__file__) + "\\lib\\maze32.dll")
-        array_pointer = np.ctypeslib.ndpointer(ctypes.c_uint8, flags="C_CONTIGUOUS")
-
-        dll.recursive_backtracking.argtypes = [
-            array_pointer, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_uint32
-        ]
         row_count, col_count = self.row_count, self.col_count
         row_count_with_walls, col_count_with_walls = self.row_count_with_walls, self.col_count_with_walls
 
@@ -127,7 +136,7 @@ class Maze(base.MazeBase):
         index = x * col_count_with_walls + y
 
         self.maze = self.maze[:, :, ::3].flatten()
-        dll.recursive_backtracking(
+        self.__dll.recursive_backtracking(
             self.maze, row_count, col_count, index
         )
         self.maze = self.maze.reshape((row_count_with_walls, col_count_with_walls, 1))
@@ -373,18 +382,11 @@ class Maze(base.MazeBase):
 
     def __s_depth_first_search_c(self, start, end):
         """Solves maze with depth-first search in C"""
-        dll = ctypes.cdll.LoadLibrary(os.path.dirname(__file__) + "\\lib\\maze32.dll")
-        array_pointer = np.ctypeslib.ndpointer(ctypes.c_uint8, flags="C_CONTIGUOUS")
-
-        dll.depth_first_search.argtypes = [
-            array_pointer, array_pointer, ctypes.c_size_t, ctypes.c_uint32, ctypes.c_uint32
-        ]
-
         start = start[0] * self.col_count_with_walls + start[1]
         end = end[0] * self.col_count_with_walls + end[1]
 
         self.solution = self.solution.flatten()
-        dll.depth_first_search(
+        self.__dll.depth_first_search(
             self.maze[:, :, ::3].flatten(), self.solution, self.col_count, start, end
         )
         self.solution = self.solution.reshape((self.row_count_with_walls, self.col_count_with_walls, 3))
