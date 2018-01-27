@@ -47,17 +47,18 @@ class Maze(base.MazeBase):
         pth = os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib", "maze32.dll")
         try:
             self.__dll = ctypes.cdll.LoadLibrary(pth)
-            ndpointer = np.ctypeslib.ndpointer(ctypes.c_uint8, flags="C_CONTIGUOUS")
-
-            self.__dll.recursive_backtracking.argtypes = [
-                ndpointer, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_uint32
-            ]
-
-            self.__dll.depth_first_search.argtypes = [
-                ndpointer, ndpointer, ctypes.c_size_t, ctypes.c_uint32, ctypes.c_uint32
-            ]
         except:
-            raise util.MazeException("maze32.dll not found in {0}".format(pth))
+            raise util.MazeException("Failed loading maze32.dll from {0}".format(pth))
+
+        ndpointer = np.ctypeslib.ndpointer(ctypes.c_uint8, flags="C_CONTIGUOUS")
+
+        self.__dll.recursive_backtracking.argtypes = [
+            ndpointer, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_uint32
+        ]
+
+        self.__dll.depth_first_search.argtypes = [
+            ndpointer, ndpointer, ctypes.c_size_t, ctypes.c_uint32, ctypes.c_uint32
+        ]
 
     def create(self, row_count, col_count, algorithm):
         """Creates maze"""
