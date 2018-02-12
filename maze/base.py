@@ -7,10 +7,13 @@ import maze.util as util
 
 
 class MazeBase:
-    """This class contains all necessary maze function"""
-
+    """
+    This class contains all necessary maze function.
+    """
     class Create(enum.Enum):
-        """Enum for creation algorithms"""
+        """
+        Enum for creation algorithms.
+        """
         C            = "Recursive backtracking algorithm C"
         BACKTRACKING = "Recursive backtracking algorithm"
         HUNT         = "Hunt and kill algorithm"
@@ -20,19 +23,31 @@ class MazeBase:
         KRUSKAL      = "Kruskal's algorithm"
 
     class Solve(enum.Enum):
-        """Enum for solving algorithms"""
+        """
+        Enum for solving algorithms.
+        """
         C       = "Depth-first search C"
         DEPTH   = "Depth-first search"
         BREADTH = "Breadth-first search"
 
     def __init__(self):
-        """Constructor"""
+        """
+        Constructor.
+
+        :param self: current instace
+        :returns: new MazeBase instance
+        """
         self.maze = None
         self.solution = None
 
     @property
     def row_count_with_walls(self):
-        """Returns row count with walls"""
+        """
+        Returns row count with walls.
+
+        :param self: current instance
+        :returns: row count with wall
+        """
         if self.maze is not None:
             return len(self.maze)
         elif self.solution is not None:
@@ -42,7 +57,12 @@ class MazeBase:
 
     @property
     def col_count_with_walls(self):
-        """Returns column count with walls"""
+        """
+        Returns column count with walls.
+
+        :param self: current instance
+        :returns: column count with walls
+        """
         if self.maze is not None:
             return len(self.maze[0])
         elif self.solution is not None:
@@ -52,21 +72,32 @@ class MazeBase:
 
     @property
     def row_count(self):
-        """Returns row count"""
+        """
+        Returns row count.
+
+        :param self: current instance
+        :returns: row count
+        """
         return self.row_count_with_walls // 2
 
     @property
     def col_count(self):
-        """Returns column count"""
+        """
+        Returns column count.
+
+        :param self: current instance
+        :returns: column count
+        """
         return self.col_count_with_walls // 2
 
     def save_maze(self, file_name="maze.png", scale=3):
         """
-        Saves maze as png
+        Saves maze as png.
 
-        Keyword arguments:
-        file_name -- name of the saved picture
-        scale     -- scale for the saved maze
+        :param self: current instance
+        :param file_name: file name of saved file
+        :param scale: upscale factor
+        :returns: none
         """
         if self.maze is None:
             raise util.MazeException(
@@ -77,11 +108,12 @@ class MazeBase:
 
     def save_solution(self, file_name="solution.png", scale=3):
         """
-        Saves solution as png
+        Saves solution as png.
 
-        Keyword arguments:
-        file_name -- name of the saved picture
-        scale     -- scale for the saved maze
+        :param self: current instance
+        :param file_name: file name of saved file
+        :param scale: upscale factor
+        :returns: none
         """
         if self.solution is None:
             raise util.MazeException(
@@ -92,10 +124,11 @@ class MazeBase:
 
     def load_maze(self, file_name="maze.png"):
         """
-        Loads maze from png
+        Loads maze from png.
 
-        Keyword arguments:
-        file_name -- name of the saved picture
+        :param self: current instance
+        :param file_name: file name of file to load
+        :returns: none
         """
         if not os.path.isfile(file_name):
             raise util.MazeException("{0} does not exist".format(file_name))
@@ -104,10 +137,11 @@ class MazeBase:
 
     def load_solution(self, file_name="solution.png"):
         """
-        Loads solution from png
+        Loads solution from png.
 
-        Keyword arguments:
-        file_name -- name of the saved picture
+        :param self: current instance
+        :param file_name: file name of file to load
+        :returns: none
         """
         if not os.path.isfile(file_name):
             raise util.MazeException("{0} does not exist".format(file_name))
