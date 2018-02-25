@@ -1,9 +1,9 @@
 import numpy as np
 
 
-class MazeException(Exception):
+class MazeError(Exception):
     def __init__(self, e):
-        super(MazeException, self).__init__(e)
+        super(MazeError, self).__init__(e)
 
 
 def stack_empty():

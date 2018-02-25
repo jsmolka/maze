@@ -51,7 +51,7 @@ class MazeBase:
         try:
             return self.maze.shape[0]
         except Exception:
-            raise util.MazeException("Unable to get row count. Maze and solution are not assigned.")
+            raise util.MazeError("Unable to get row count. Maze and solution are not assigned.")
 
     @property
     def col_count_with_walls(self):
@@ -63,7 +63,7 @@ class MazeBase:
         try:
             return self.maze.shape[1]
         except Exception:
-            raise util.MazeException("Unable to get col count. Maze and solution are not assigned.")
+            raise util.MazeError("Unable to get col count. Maze and solution are not assigned.")
 
     @property
     def row_count(self):
@@ -93,7 +93,7 @@ class MazeBase:
         try:
             self._dll = ctypes.cdll.LoadLibrary(pth)
         except Exception:
-            raise util.MazeException("Failed loading maze32.dll from <{}>".format(pth))
+            raise util.MazeError("Failed loading maze32.dll from <{}>".format(pth))
 
         ndpointer = np.ctypeslib.ndpointer(ctypes.c_uint8, flags="C_CONTIGUOUS")
 
@@ -114,7 +114,7 @@ class MazeBase:
         :returns: none
         """
         if self.maze is None:
-            raise util.MazeException(
+            raise util.MazeError(
                 "Cannot save maze because it is not assigned.\n"
                 "Use the \"create\" or \"load_maze\" method to create or load a maze.")
 
@@ -129,7 +129,7 @@ class MazeBase:
         :returns: none
         """
         if self.solution is None:
-            raise util.MazeException(
+            raise util.MazeError(
                 "Cannot save solution because it is not assigned.\n"
                 "Use the \"solve\" method to solve a maze.")
 
@@ -143,6 +143,6 @@ class MazeBase:
         :returns: none
         """
         if not os.path.isfile(file_name):
-            raise util.MazeException("Cannot load maze because <{}> does not exist.".format(file_name))
+            raise util.MazeError("Cannot load maze because <{}> does not exist.".format(file_name))
 
         self.maze = util.downscale(np.array(Image.open(file_name)))

@@ -42,7 +42,7 @@ class Maze(base.MazeBase):
         :returns: none
         """
         if (row_count or col_count) <= 0:
-            raise util.MazeException("Row or column count cannot be smaller than zero.")
+            raise util.MazeError("Row or column count cannot be smaller than zero.")
 
         self.maze = np.zeros((2 * row_count + 1, 2 * col_count + 1, 3), dtype=np.uint8)
 
@@ -61,7 +61,7 @@ class Maze(base.MazeBase):
         if algorithm == Maze.Create.KRUSKAL:
             return self._kruskal()
 
-        raise util.MazeException(
+        raise util.MazeError(
             "Wrong algorithm <{}>.\n"
             "Use \"Maze.Create.<algorithm>\" to choose an algorithm.".format(algorithm))
 
@@ -95,7 +95,7 @@ class Maze(base.MazeBase):
         :returns: none
         """
         if self.maze is None:
-            raise util.MazeException(
+            raise util.MazeError(
                 "Maze is not assigned.\n"
                 "Use the \"create\" or \"load_maze\" method to create or load a maze.")
 
@@ -103,9 +103,9 @@ class Maze(base.MazeBase):
         end = end if end else (self.row_count - 1, self.col_count - 1)
 
         if not (0 <= start[0] < self.row_count and 0 <= start[1] < self.col_count):
-            raise util.MazeException("Start point <{}> is out of range.".format(start))
+            raise util.MazeError("Start point <{}> is out of range.".format(start))
         if not (0 <= end[0] < self.row_count and 0 <= end[1] < self.col_count):
-            raise util.MazeException("End point <{}> is out of range.".format(end))
+            raise util.MazeError("End point <{}> is out of range.".format(end))
 
         start = tuple([2 * x + 1 for x in start])
         end = tuple([2 * x + 1 for x in end])
@@ -119,7 +119,7 @@ class Maze(base.MazeBase):
         if algorithm == Maze.Solve.BREADTH:
             return self._breadth_first_search(start, end)
 
-        raise util.MazeException(
+        raise util.MazeError(
             "Wrong algorithm <{}>.\n"
             "Use \"Algorithm.Solve.<algorithm>\" to choose an algorithm.".format(algorithm))
 
@@ -491,7 +491,7 @@ class Maze(base.MazeBase):
                 x, y = self._solve_walk(x, y, visited_cells)
             x, y = self._solve_backtrack(stack, visited_cells)
 
-        raise util.MazeException("No solution found")
+        raise util.MazeError("No solution found")
 
     def _enqueue(self, queue, visited_cells):
         """
@@ -533,4 +533,4 @@ class Maze(base.MazeBase):
                 cell = util.stack_push(queue[0], end)  # Push end into cell
                 return util.draw_path(self.solution, util.stack_to_list(cell))
 
-        raise util.MazeException("No solution found")
+        raise util.MazeError("No solution found")
