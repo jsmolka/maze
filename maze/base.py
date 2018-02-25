@@ -48,12 +48,10 @@ class MazeBase:
 
         :returns: row count with wall
         """
-        if self.maze is not None:
-            return len(self.maze)
-        elif self.solution is not None:
-            return len(self.solution)
-        else:
-            raise util.MazeException("Maze and solution are not assigned")
+        try:
+            return self.maze.shape[0]
+        except Exception:
+            raise util.MazeException("Unable to get row count. Maze and solution are not assigned.")
 
     @property
     def col_count_with_walls(self):
@@ -62,12 +60,10 @@ class MazeBase:
 
         :returns: column count with walls
         """
-        if self.maze is not None:
-            return len(self.maze[0])
-        elif self.solution is not None:
-            return len(self.solution[0])
-        else:
-            raise util.MazeException("Maze and solution are not assigned")
+        try:
+            return self.maze.shape[1]
+        except Exception:
+            raise util.MazeException("Unable to get col count. Maze and solution are not assigned.")
 
     @property
     def row_count(self):
@@ -97,7 +93,7 @@ class MazeBase:
         try:
             self._dll = ctypes.cdll.LoadLibrary(pth)
         except Exception:
-            raise util.MazeException("Failed loading maze32.dll from {0}".format(pth))
+            raise util.MazeException("Failed loading maze32.dll from <{}>".format(pth))
 
         ndpointer = np.ctypeslib.ndpointer(ctypes.c_uint8, flags="C_CONTIGUOUS")
 
@@ -119,8 +115,8 @@ class MazeBase:
         """
         if self.maze is None:
             raise util.MazeException(
-                "Maze is not assigned\n"
-                "Use \"create\" or \"load_maze\" method to create or load a maze")
+                "Cannot save maze because it is not assigned.\n"
+                "Use the \"create\" or \"load_maze\" method to create or load a maze.")
 
         Image.fromarray(util.upscale(self.maze, scale), "RGB").save(file_name, "png")
 
@@ -134,8 +130,8 @@ class MazeBase:
         """
         if self.solution is None:
             raise util.MazeException(
-                "Solution is not assigned\n"
-                "Use \"solve\" method to solve a maze")
+                "Cannot save solution because it is not assigned.\n"
+                "Use the \"solve\" method to solve a maze.")
 
         Image.fromarray(util.upscale(self.solution, scale), "RGB").save(file_name, "png")
 
@@ -147,18 +143,6 @@ class MazeBase:
         :returns: none
         """
         if not os.path.isfile(file_name):
-            raise util.MazeException("{0} does not exist".format(file_name))
+            raise util.MazeException("Cannot load maze because <{}> does not exist.".format(file_name))
 
         self.maze = util.downscale(np.array(Image.open(file_name)))
-
-    def load_solution(self, file_name="solution.png"):
-        """
-        Loads solution from png.
-
-        :param file_name: file name of file to load
-        :returns: none
-        """
-        if not os.path.isfile(file_name):
-            raise util.MazeException("{0} does not exist".format(file_name))
-
-        self.solution = util.downscale(np.array(Image.open(file_name)))
