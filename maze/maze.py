@@ -47,19 +47,19 @@ class Maze(base.MazeBase):
         self.maze = np.zeros((2 * row_count + 1, 2 * col_count + 1, 3), dtype=np.uint8)
 
         if algorithm == Maze.Create.C:
-            return self._c_recursive_backtracking_c()
+            return self._recursive_backtracking_c()
         if algorithm == Maze.Create.BACKTRACKING:
-            return self._c_recursive_backtracking()
+            return self._recursive_backtracking()
         if algorithm == Maze.Create.HUNT:
-            return self._c_hunt_and_kill()
+            return self._hunt_and_kill()
         if algorithm == Maze.Create.ELLER:
-            return self._c_eller()
+            return self._eller()
         if algorithm == Maze.Create.SIDEWINDER:
-            return self._c_sidewinder()
+            return self._sidewinder()
         if algorithm == Maze.Create.PRIM:
-            return self._c_prim()
+            return self._prim()
         if algorithm == Maze.Create.KRUSKAL:
-            return self._c_kruskal()
+            return self._kruskal()
 
         raise util.MazeException(
             "Wrong algorithm <{}>.\n"
@@ -113,17 +113,17 @@ class Maze(base.MazeBase):
         self.solution = self.maze.copy()
 
         if algorithm == Maze.Solve.C:
-            return self._s_depth_first_search_c(start, end)
+            return self._depth_first_search_c(start, end)
         if algorithm == Maze.Solve.DEPTH:
-            return self._s_depth_first_search(start, end)
+            return self._depth_first_search(start, end)
         if algorithm == Maze.Solve.BREADTH:
-            return self._s_breadth_first_search(start, end)
+            return self._breadth_first_search(start, end)
 
         raise util.MazeException(
             "Wrong algorithm <{}>.\n"
             "Use \"Algorithm.Solve.<algorithm>\" to choose an algorithm.".format(algorithm))
 
-    def _c_recursive_backtracking_c(self):
+    def _recursive_backtracking_c(self):
         """
         Creates a maze using the recursive backtracking algorithm in C.
 
@@ -134,32 +134,31 @@ class Maze(base.MazeBase):
 
         x = 2 * random.randint(0, row_count - 1) + 1
         y = 2 * random.randint(0, col_count - 1) + 1
-        index = x * col_count_with_walls + y
+        idx = x * col_count_with_walls + y
 
         self.maze = self.maze[:, :, ::3].flatten()
         self._dll.recursive_backtracking(
-            self.maze, row_count, col_count, index
+            self.maze, row_count, col_count, idx
         )
         self.maze = self.maze.reshape((row_count_with_walls, col_count_with_walls, 1))
         self.maze = self.maze.repeat(3, axis=2)
 
-    def _c_walk(self, x, y):
+    def _create_walk(self, x, y):
         """
         Randomly walks from one pointer within the maze to another one.
 
         :param x: x coordinate
         :param y: y coordinate
-        :returns: new coordinate, stop walking
+        :returns: new cell
         """
         for idx in self._random:  # Check adjacent cells randomly
             tx, ty = self._dir_two[idx](x, y)
             if not self._out_of_bounds(tx, ty) and self.maze[tx, ty, 0] == 0:  # Check if unvisited
-                bx, by = self._dir_one[idx](x, y)
-                self.maze[tx, ty] = self.maze[bx, by] = [255, 255, 255]  # Mark as visited
-                return tx, ty  # Return new cell and continue walking
-        return None, None  # Return stop values and stop walking
+                self.maze[tx, ty] = self.maze[self._dir_one[idx](x, y)] = [255, 255, 255]  # Mark as visited
+                return tx, ty  # Return new cell
+        return None, None  # Return stop values
 
-    def _c_backtrack(self, stack):
+    def _create_backtrack(self, stack):
         """
         Backtracks the stack until walking is possible again.
 
@@ -174,30 +173,30 @@ class Maze(base.MazeBase):
                     return x, y  # Return cell with unvisited neighbour
         return None, None  # Return stop values if stack is empty
 
-    def _c_recursive_backtracking(self):
+    def _recursive_backtracking(self):
         """
         Creates a maze using the recursive backtracking algorithm.
 
         :returns: none
         """
-        stack = []  # List of visited cells [(x, y), ...]
+        stack = collections.deque()  # List of visited cells [(x, y), ...]
 
         x = 2 * random.randint(0, self.row_count - 1) + 1
         y = 2 * random.randint(0, self.col_count - 1) + 1
         self.maze[x, y] = [255, 255, 255]  # Mark as visited
 
-        while x:
-            while x:
+        while x and y:
+            while x and y:
                 stack.append((x, y))
-                x, y = self._c_walk(x, y)
-            x, y = self._c_backtrack(stack)
+                x, y = self._create_walk(x, y)
+            x, y = self._create_backtrack(stack)
 
-    def _c_hunt(self, hunt_list):
+    def _hunt(self, hunt_list):
         """
         Scans maze for new position.
 
         :param hunt_list: list of unfinished rows
-        :returns: new cell for walking
+        :returns: new cell
         """
         while hunt_list:
             for x in hunt_list:
@@ -214,7 +213,7 @@ class Maze(base.MazeBase):
                     break  # Restart loop
         return None, None  # Return stop values if all rows are finished
 
-    def _c_hunt_and_kill(self):
+    def _hunt_and_kill(self):
         """
         Creates a maze using the hunt and kill algorithm.
 
@@ -228,10 +227,10 @@ class Maze(base.MazeBase):
 
         while hunt_list:
             while x and y:
-                x, y = self._c_walk(x, y)
-            x, y = self._c_hunt(hunt_list)
+                x, y = self._create_walk(x, y)
+            x, y = self._hunt(hunt_list)
 
-    def _c_eller(self):
+    def _eller(self):
         """
         Creates a maze using Eller's algorithm.
 
@@ -242,7 +241,7 @@ class Maze(base.MazeBase):
         set_index = 1
 
         for x in range(1, self.row_count_with_walls - 1, 2):
-            connect_list = []  # List of connections between cells [True, ...]
+            connect_list = collections.deque()  # List of connections between cells [True, ...]
 
             # Create row stack
             if row_stack[0] == 0:  # Define first cell in row
@@ -250,7 +249,7 @@ class Maze(base.MazeBase):
                 set_index += 1
 
             for y in range(1, self.col_count):  # Define other cells in row
-                if bool(random.getrandbits(1)):  # Connect cell with previous cell
+                if random.getrandbits(1):  # Connect cell with previous cell
                     if row_stack[y] != 0:  # Cell has a set
                         old_index = row_stack[y]
                         new_index = row_stack[y - 1]
@@ -275,7 +274,7 @@ class Maze(base.MazeBase):
 
                 self.maze[x, maze_col] = [255, 255, 255]  # Mark as visited
                 if y < self.col_count - 1:
-                    if connect_list[y]:
+                    if connect_list.popleft():
                         self.maze[x, maze_col + 1] = [255, 255, 255]  # Mark as visited
 
             if x == self.row_count_with_walls - 2:  # Connect all different sets in last row
@@ -293,21 +292,21 @@ class Maze(base.MazeBase):
             # Create vertical links
             set_list.sort(reverse=True)
             while set_list:
-                sub_set_list = []  # List of set indices with positions for one set index [(set index, position), ...]
+                sub_set_list = collections.deque()  # List of set indices with positions for one set index [(set index, position), ...]
                 sub_set_index = set_list[-1][0]
                 while set_list and set_list[-1][0] == sub_set_index:  # Create sub list for one set index
                     sub_set_list.append(set_list.pop())
                 linked = False
                 while not linked:  # Create at least one link for each set index
                     for sub_set_item in sub_set_list:
-                        if bool(random.getrandbits(1)):  # Create link
+                        if random.getrandbits(1):  # Create link
                             linked = True
                             link_set, link_position = sub_set_item
 
                             row_stack[link_position // 2] = link_set  # Assign links to new row stack
                             self.maze[x + 1, link_position] = [255, 255, 255]  # Mark link as visited
 
-    def _c_sidewinder(self):
+    def _sidewinder(self):
         """
         Creates a maze using the sidewinder algorithm
 
@@ -324,7 +323,7 @@ class Maze(base.MazeBase):
                 self.maze[x, y] = [255, 255, 255]  # Mark as visited
                 row_stack.append(y)
 
-                if bool(random.getrandbits(1)):  # Create vertical link
+                if random.getrandbits(1):  # Create vertical link
                     index = random.randint(0, len(row_stack) - 1)
                     self.maze[x - 1, row_stack[index]] = [255, 255, 255]  # Mark as visited
                     row_stack = []  # Reset row stack
@@ -338,7 +337,7 @@ class Maze(base.MazeBase):
             index = random.randint(0, len(row_stack) - 1)
             self.maze[x - 1, row_stack[index]] = [255, 255, 255]  # Mark as visited
 
-    def _c_prim(self):
+    def _prim(self):
         """
         Creates a maze using Prim's algorithm.
 
@@ -376,7 +375,7 @@ class Maze(base.MazeBase):
                     frontier.append((tx, ty))
                     self.maze[tx, ty] = [1, 1, 1]  # Mark as part of frontier
 
-    def _c_kruskal(self):
+    def _kruskal(self):
         """
         Creates a maze using Kruskal's algorithm.
 
@@ -384,7 +383,7 @@ class Maze(base.MazeBase):
         """
         xy_to_set = np.zeros((self.row_count_with_walls, self.col_count_with_walls), dtype=np.uint32)
         set_to_xy = []  # List of sets in order, set 0 at index 0 [[(x, y),...], ...]
-        edges = []  # List of possible edges [(x, y, direction), ...]
+        edges = collections.deque()  # List of possible edges [(x, y, direction), ...]
         set_index = 0
 
         for x in range(1, self.row_count_with_walls - 1, 2):
@@ -420,7 +419,7 @@ class Maze(base.MazeBase):
                 for pos in set_to_xy[old_set]:
                     xy_to_set[pos] = new_set
 
-    def _s_depth_first_search_c(self, start, end):
+    def _depth_first_search_c(self, start, end):
         """
         Solves a maze using depth-first search in C.
 
@@ -437,7 +436,7 @@ class Maze(base.MazeBase):
         )
         self.solution = self.solution.reshape((self.row_count_with_walls, self.col_count_with_walls, 3))
 
-    def _s_walk(self, x, y, visited_cells):
+    def _solve_walk(self, x, y, visited_cells):
         """
         Walks over a maze.
 
@@ -454,7 +453,7 @@ class Maze(base.MazeBase):
                 return tx, ty  # Return new cell
         return None, None  # Return stop values
 
-    def _s_backtrack(self, stack, visited_cells):
+    def _solve_backtrack(self, stack, visited_cells):
         """
         Backtracks a stacks.
 
@@ -470,7 +469,7 @@ class Maze(base.MazeBase):
                     return x, y  # Return cell with unvisited neighbour
         return None, None  # Return stop values if stack is empty and no new cell was found
 
-    def _s_depth_first_search(self, start, end):
+    def _depth_first_search(self, start, end):
         """
         Solves a maze using depth-first search.
 
@@ -489,29 +488,29 @@ class Maze(base.MazeBase):
                 stack.append((x, y))
                 if (x, y) == end:  # Stop if end has been found
                     return util.draw_path(self.solution, stack)
-                x, y = self._s_walk(x, y, visited_cells)
-            x, y = self._s_backtrack(stack, visited_cells)
+                x, y = self._solve_walk(x, y, visited_cells)
+            x, y = self._solve_backtrack(stack, visited_cells)
 
         raise util.MazeException("No solution found")
 
-    def _s_enqueue(self, deque, visited_cells):
+    def _enqueue(self, queue, visited_cells):
         """
         Queues next cells.
 
-        :param deque: deque for queueing
+        :param queue: queue for queueing
         :param visited_cells: ndarray of visited cells
         :returns: none
         """
-        cell = deque.popleft()
+        cell = queue.popleft()
         x, y = cell[0]
         for idx in self._random:  # Check adjacent cells
             tx, ty = self._dir_two[idx](x, y)
             bx, by = self._dir_one[idx](x, y)
             if visited_cells[bx, by, 0] == 255:  # Check if unvisited
                 visited_cells[bx, by] = visited_cells[tx, ty] = [0, 0, 0]  # Mark as visited
-                deque.append(util.stack_push(cell, (tx, ty)))
+                queue.append(util.stack_push(cell, (tx, ty)))
 
-    def _s_breadth_first_search(self, start, end):
+    def _breadth_first_search(self, start, end):
         """
         Solves a maze using breadth-first search.
 
@@ -520,18 +519,18 @@ class Maze(base.MazeBase):
         :returns: none
         """
         visited_cells = self.maze.copy()  # List of visited cells, value of visited cell is [0, 0, 0]
-        deque = collections.deque()  # List of cells [cell, ...]
+        queue = collections.deque()  # List of cells [cell, ...]
         cell = util.stack_empty()  # Tuple of current cell with according stack ((x, y), stack)
 
         x, y = start
         cell = util.stack_push(cell, (x, y))
-        deque.append(cell)
+        queue.append(cell)
         visited_cells[x, y] = [0, 0, 0]  # Mark as visited
 
-        while deque:
-            self._s_enqueue(deque, visited_cells)
-            if deque[0][0] == end:  # Stop if end has been found
-                cell = util.stack_push(deque[0], end)  # Push end into cell
+        while queue:
+            self._enqueue(queue, visited_cells)
+            if queue[0][0] == end:  # Stop if end has been found
+                cell = util.stack_push(queue[0], end)  # Push end into cell
                 return util.draw_path(self.solution, util.stack_to_list(cell))
 
         raise util.MazeException("No solution found")

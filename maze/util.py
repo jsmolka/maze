@@ -1,21 +1,9 @@
 import numpy as np
-import random
+
 
 class MazeException(Exception):
     def __init__(self, e):
         super(MazeException, self).__init__(e)
-
-
-def shuffled(lst):
-    """
-    Copies and shuffles list.
-
-    :param lst: list to be shuffled
-    :returns: shuffled list
-    """
-    result = lst[:]
-    random.shuffle(result)
-    return result
 
 
 def stack_empty():
