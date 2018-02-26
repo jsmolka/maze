@@ -445,7 +445,7 @@ class Maze(base.MazeBase):
         :param visited: ndarray of visited cells
         :returns: new cell
         """
-        for idx in self._random:  # Check adjacent cells
+        for idx in range(4):  # Check adjacent cells
             bx, by = self._dir_one[idx](x, y)
             if visited[bx, by, 0] == 255:  # Check if unvisited
                 tx, ty = self._dir_two[idx](x, y)
