@@ -1,9 +1,8 @@
 import numpy as np
 import collections
-import heapq
 import random
 
-import maze.util as util
+import maze.utils as utils
 import maze.base as base
 
 
@@ -43,7 +42,7 @@ class Maze(base.MazeBase):
         :returns: None
         """
         if (row_count or col_count) <= 0:
-            raise util.MazeError("Row or column count cannot be smaller than zero.")
+            raise utils.MazeError("Row or column count cannot be smaller than zero.")
 
         self.maze = np.zeros((2 * row_count + 1, 2 * col_count + 1, 3), dtype=np.uint8)
 
@@ -62,7 +61,7 @@ class Maze(base.MazeBase):
         if algorithm == Maze.Create.KRUSKAL:
             return self._kruskal()
 
-        raise util.MazeError(
+        raise utils.MazeError(
             "Wrong algorithm <{}>.\n"
             "Use \"Maze.Create.<algorithm>\" to choose an algorithm.".format(algorithm))
 
@@ -96,7 +95,7 @@ class Maze(base.MazeBase):
         :returns: None
         """
         if self.maze is None:
-            raise util.MazeError(
+            raise utils.MazeError(
                 "Maze is not assigned.\n"
                 "Use the \"create\" or \"load_maze\" method to create or load a maze.")
 
@@ -104,9 +103,9 @@ class Maze(base.MazeBase):
         end = end if end else (self.row_count - 1, self.col_count - 1)
 
         if not (0 <= start[0] < self.row_count and 0 <= start[1] < self.col_count):
-            raise util.MazeError("Start point <{}> is out of range.".format(start))
+            raise utils.MazeError("Start point <{}> is out of range.".format(start))
         if not (0 <= end[0] < self.row_count and 0 <= end[1] < self.col_count):
-            raise util.MazeError("End point <{}> is out of range.".format(end))
+            raise utils.MazeError("End point <{}> is out of range.".format(end))
 
         start = tuple([2 * x + 1 for x in start])
         end = tuple([2 * x + 1 for x in end])
@@ -119,10 +118,8 @@ class Maze(base.MazeBase):
             return self._depth_first_search(start, end)
         if algorithm == Maze.Solve.BREADTH:
             return self._breadth_first_search(start, end)
-        if algorithm == Maze.Solve.ASTAR:
-            return self._a_star(start, end)
 
-        raise util.MazeError(
+        raise utils.MazeError(
             "Wrong algorithm <{}>.\n"
             "Use \"Algorithm.Solve.<algorithm>\" to choose an algorithm.".format(algorithm))
 
@@ -490,11 +487,11 @@ class Maze(base.MazeBase):
             while x and y:
                 stack.append((x, y))
                 if (x, y) == end:  # Stop if end has been found
-                    return util.draw_path(self.solution, stack)
+                    return utils.draw_path(self.solution, stack)
                 x, y = self._solve_walk(x, y, visited)
             x, y = self._solve_backtrack(stack, visited)
 
-        raise util.MazeError("No solution found.")
+        raise utils.MazeError("No solution found.")
 
     def _enqueue(self, queue, visited):
         """
@@ -511,7 +508,7 @@ class Maze(base.MazeBase):
             if visited[bx, by, 0] == 255:  # Check if unvisited
                 tx, ty = self._dir_two[idx](x, y)
                 visited[bx, by, 0] = visited[tx, ty, 0] = 0  # Mark as visited
-                queue.append(util.stack_push(cell, (tx, ty)))
+                queue.append(utils.stack_push(cell, (tx, ty)))
 
     def _breadth_first_search(self, start, end):
         """
@@ -523,45 +520,17 @@ class Maze(base.MazeBase):
         """
         visited = self.maze.copy()  # List of visited cells, value of visited cell is 0
         queue = collections.deque()  # List of cells [cell, ...]
-        cell = util.stack_empty()  # Tuple of current cell with according stack ((x, y), stack)
+        cell = utils.stack_empty()  # Tuple of current cell with according stack ((x, y), stack)
 
         x, y = start
-        cell = util.stack_push(cell, (x, y))
+        cell = utils.stack_push(cell, (x, y))
         queue.append(cell)
         visited[x, y, 0] = 0  # Mark as visited
 
         while queue:
             self._enqueue(queue, visited)
             if queue[0][0] == end:  # Stop if end has been found
-                cell = util.stack_push(queue[0], end)  # Push end into cell
-                return util.draw_path(self.solution, util.stack_deque(cell))
+                cell = utils.stack_push(queue[0], end)  # Push end into cell
+                return utils.draw_path(self.solution, utils.stack_deque(cell))
 
-        raise util.MazeError("No solution found.")
-
-    def _a_star(self, start, end):
-        """
-        Solves a maze using the A* algorithm.
-
-        :param start: tuple with start coordinates
-        :param end: tuple with end coordinates
-        :return: None
-        """
-        visited = self.maze.copy()  # List of visited cells, value of visited cell is 0
-        queue = []  # Priority queue [(heuristic, cost, stack), ...]
-        cell = util.stack_empty()  # Tuple of current cell with according stack ((x, y), stack)
-        heapq.heappush(queue, (0 + util.heuristic(start, end), 0, util.stack_push(cell, start)))
-        while queue:
-            _, cost, cell = heapq.heappop(queue)  # Pop cell with highest priority
-            if cell[0] == end:  # Stop if end has been found
-                cell = util.stack_push(cell, end)
-                return util.draw_path(self.solution, util.stack_deque(cell))
-            x, y = cell[0]
-            if visited[x, y, 0] == 0:
-                continue
-            visited[cell[0], 0] = 0  # Mark as visited
-            for direction in self._dir_one:
-                tx, ty = direction(*cell[0])
-                if visited[tx, ty, 0] == 255:  # Check if unvisited
-                    heapq.heappush(queue, (cost + util.heuristic(cell[0], end), cost + 1, util.stack_push(cell, (tx, ty))))
-
-        raise util.MazeError("No solution found.")
+        raise utils.MazeError("No solution found.")

@@ -74,31 +74,6 @@ def draw_path(solution, stack):
         iteration += 2
 
 
-def maze_graph(maze):
-    height = len(maze)
-    width = len(maze[0])
-    graph = {(x, y): [] for y in range(width) for x in range(height) if not maze[x, y, 0]}
-    for row, col in graph.keys():
-        if row < height - 1 and not maze[row + 1, col, 0]:
-            graph[(row, col)].append((row + 1, col))
-            graph[(row + 1, col)].append((row, col))
-        if col < width - 1 and not maze[row, col + 1, 0]:
-            graph[(row, col)].append((row, col + 1))
-            graph[(row, col + 1)].append((row, col))
-    return graph
-
-
-def heuristic(cell, end):
-    """
-    Heuristic used in A* algorithm.
-
-    :param cell: current cell
-    :param end: end cell
-    :return: integer
-    """
-    return abs(cell[0] - end[0]) + abs(cell[1] - end[1])
-
-
 def upscale(maze, scale):
     """
     Upscales maze.

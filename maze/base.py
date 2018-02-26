@@ -4,7 +4,7 @@ import enum
 import os
 from PIL import Image
 
-import maze.util as util
+import maze.utils as util
 
 
 class MazeBase:
@@ -30,7 +30,6 @@ class MazeBase:
         C       = "Depth-first search C"
         DEPTH   = "Depth-first search"
         BREADTH = "Breadth-first search"
-        ASTAR   = "A* algorithm"
 
     def __init__(self):
         """
