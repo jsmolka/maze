@@ -1,4 +1,5 @@
 import numpy as np
+import collections
 
 
 class MazeError(Exception):
@@ -26,18 +27,18 @@ def stack_push(stack, item):
     return item, stack
 
 
-def stack_to_list(stack):
+def stack_deque(stack):
     """
-    Converts spaghetti stack into list.
+    Converts spaghetti stack into deque.
 
     :param stack: stack to be converted
     :returns: stack as list
     """
-    lst = []
+    deque = collections.deque()
     while stack:
         item, stack = stack
-        lst.append(item)
-    return lst[::-1]
+        deque.appendleft(item)
+    return deque
 
 
 def color(offset, iteration):
@@ -48,7 +49,7 @@ def color(offset, iteration):
     :param iteration: current iteration
     :returns: color for current iteration
     """
-    return [0 + (iteration * offset), 0, 255 - (iteration * offset)]
+    return 0 + (iteration * offset), 0, 255 - (iteration * offset)
 
 
 def draw_path(solution, stack):
@@ -59,14 +60,18 @@ def draw_path(solution, stack):
     :param stack: stack which contains every second cell to draw
     :returns: solution with drawn stack
     """
-    offset = 255 / (2 * len(stack))
-    for i in range(0, len(stack) - 1):
-        x1, y1 = tuple(stack[i])
-        x2, y2 = tuple(stack[i + 1])
-        x3, y3 = int((x1 + x2) / 2), int((y1 + y2) / 2)
-        solution[x1, y1] = color(offset, 2 * i)
-        solution[x3, y3] = color(offset, 2 * i + 1)
-    solution[tuple(stack[-1])] = color(offset, 2 * (len(stack) - 1))
+    total = 2 * len(stack)
+    offset = 255 / total
+    iteration = 2
+
+    x1, y1 = stack.popleft()
+    solution[x1, y1] = color(offset, 0)
+    while iteration < total:
+        x2, y2 = stack.popleft()
+        solution[x2, y2] = color(offset, iteration - 1)
+        solution[(x1 + x2) // 2, (y1 + y2) // 2] = color(offset, iteration)
+        x1, y1 = x2, y2
+        iteration += 2
 
 
 def upscale(maze, scale):

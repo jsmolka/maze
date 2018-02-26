@@ -478,7 +478,7 @@ class Maze(base.MazeBase):
         :returns: None
         """
         visited = self.maze.copy()  # List of visited cells, value of visited cell is [0, 0, 0]
-        stack = []  # List of visited cells [(x, y), ...]
+        stack = collections.deque()  # List of visited cells [(x, y), ...]
 
         x, y = start
         visited[x, y, 0] = 0  # Mark as visited
@@ -504,10 +504,10 @@ class Maze(base.MazeBase):
         cell = queue.popleft()
         x, y = cell[0]
         for idx in self._random:  # Check adjacent cells
-            tx, ty = self._dir_two[idx](x, y)
             bx, by = self._dir_one[idx](x, y)
             if visited[bx, by, 0] == 255:  # Check if unvisited
-                visited[bx, by] = visited[tx, ty] = [0, 0, 0]  # Mark as visited
+                tx, ty = self._dir_two[idx](x, y)
+                visited[bx, by, 0] = visited[tx, ty, 0] = 0  # Mark as visited
                 queue.append(util.stack_push(cell, (tx, ty)))
 
     def _breadth_first_search(self, start, end):
@@ -525,12 +525,12 @@ class Maze(base.MazeBase):
         x, y = start
         cell = util.stack_push(cell, (x, y))
         queue.append(cell)
-        visited[x, y] = [0, 0, 0]  # Mark as visited
+        visited[x, y, 0] = 0  # Mark as visited
 
         while queue:
             self._enqueue(queue, visited)
             if queue[0][0] == end:  # Stop if end has been found
                 cell = util.stack_push(queue[0], end)  # Push end into cell
-                return util.draw_path(self.solution, util.stack_to_list(cell))
+                return util.draw_path(self.solution, util.stack_deque(cell))
 
         raise util.MazeError("No solution found")
