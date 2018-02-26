@@ -7,12 +7,6 @@
 #include "directions.h"
 #include "stack.h"
 
-typedef struct walk_s
-{
-    index_t idx;
-    bool walking;
-} walk_t;
-
-void depth_first_search(uint8_t* input, uint8_t* output, size_t col_count, index_t start, index_t end);
+void depth_first_search(uint8_t* input, uint8_t* output, int col_count, int start, int end);
 
 #endif

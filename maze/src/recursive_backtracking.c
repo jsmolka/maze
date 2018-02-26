@@ -1,82 +1,80 @@
 #include "recursive_backtracking.h"
 
-/* Define global variables */
 uint8_t* maze;
-directions_t* c_dir_one;
-directions_b_t* dir_two;
-size_t row_count_with_walls;
-size_t col_count_with_walls;
-index_t max_index;
+dir_t* dir_one;
+dir_t* dir_two;
+int* range;
+int row_count_with_walls;
+int col_count_with_walls;
+int max_index;
 
-bool out_ouf_bounds(index_t idx)
+bool out_ouf_bounds(int idx)
 {
-    /* Check if index is out of bounds or if y is even */
     return idx >= max_index || (idx % col_count_with_walls) % 2 == 0;
 }
 
-walk_t c_walk(index_t idx)
+int c_walk(int idx)
 {
-    walk_t w;
-    w.idx = idx;
-    w.walking = true;
-
-    shuffle(dir_two);
-    for (size_t i = 0; i < 4; i++)  /* Check adjacent cells randomly */
+    shuffle(range);
+    for (int i = 0; i < 4; i++)
     {
-        indices_t idc = dir_two[i](idx);
-        if (!out_ouf_bounds(idc.idx1) && maze[idc.idx1] == 0)  /* Check if unvisited */
+        int j = range[i];
+        int idx2 = dir_two[j](idx);
+        if (!out_ouf_bounds(idx2) && maze[idx2] == 0)
         {
-            maze[idc.idx1] = maze[idc.idx2] = 255;  /* Mark as visited */
-            w.idx = idc.idx1;
-            return w;  /* Return new index and continue walking */
+            int idx1 = dir_one[j](idx);
+            maze[idx1] = maze[idx2] = 255;
+            return idx2;
         }
     }
-    w.walking = false;
-    return w;  /* Return old index and stop walking */
+    return -1;
 }
 
-index_t c_backtrack(stack_t* stack)
+int c_backtrack(stack_t* stack)
 {
     while (!stack_empty(stack))
     {
-        index_t idx = stack_pop(stack);
-        for (size_t i = 0; i < 4; i++)  /* Check adjacent cells */
+        int idx = stack_pop(stack);
+        for (int i = 0; i < 4; i++)
         {
-            index_t tidx = c_dir_one[i](idx);
-            if (!out_ouf_bounds(tidx) && maze[tidx] == 0)  /* Check if unvisited */
+            int tidx = dir_two[i](idx);
+            if (!out_ouf_bounds(tidx) && maze[tidx] == 0)
             {
-                return idx;  /* Return index with unvisited neighbour */
+                return idx;
             }
         }
     }
-    return -1;  /* Return stop values if stack is empty */
+    return -1;
 }
 
-void recursive_backtracking(uint8_t* input, size_t row_count, size_t col_count, index_t idx)
+void recursive_backtracking(uint8_t* input, int row_count, int col_count, int idx)
 {
+    srand(time(NULL));
+
     row_count_with_walls = 2 * row_count + 1;
     col_count_with_walls = 2 * col_count + 1;
     max_index = row_count_with_walls * col_count_with_walls;
     maze = input;
 
-    setup_directions(col_count_with_walls);
-    c_dir_one = get_c_dir_one();
+    initialize(col_count_with_walls);
+    dir_one = get_dir_one();
     dir_two = get_dir_two();
-    srand(time(NULL));  /* Seed rand with time */
+
+    range = malloc(4 * sizeof(int));
+    range[0] = 0;
+    range[1] = 1;
+    range[2] = 2;
+    range[3] = 3;
+
+    maze[idx] = 255;
     stack_t* stack = stack_new();
-
-    walk_t w;
-    w.idx = idx;
-    maze[w.idx] = 255;  /* Mark as visited */
-
-    while (w.idx != -1)
+    while (idx != -1)
     {
-        w.walking = true;
-        while (w.walking)
+        while (idx != -1)
         {
-            stack_push(stack, w.idx);
-            w = c_walk(w.idx);
+            stack_push(stack, idx);
+            idx = c_walk(idx);
         }
-        w.idx = c_backtrack(stack);
+        idx = c_backtrack(stack);
     }
 }

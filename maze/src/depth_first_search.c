@@ -1,49 +1,43 @@
 #include "depth_first_search.h"
 
-/* Define global variables */
 uint8_t* maze;
-directions_t* s_dir_one;
-directions_b_t* dir_two;
-size_t col_count_with_walls;
+dir_t* dir_one;
+dir_t* dir_two;
+int col_count_with_walls;
 
-walk_t s_walk(index_t idx)
+int s_walk(int idx)
 {
-    walk_t w;
-    w.idx = idx;
-    w.walking = true;
-
-    for (size_t i = 0; i < 4; i++)  /* Check adjacent cells */
+    for (int i = 0; i < 4; i++)
     {
-        indices_t idc = dir_two[i](idx);
-        if (maze[idc.idx2] == 255)  /* Check if unvisited */
+        int idx1 = dir_one[i](idx);
+        if (maze[idx1] == 255)
         {
-            maze[idc.idx1] = maze[idc.idx2] = 0;  /* Mark as visited */
-            w.idx = idc.idx1;
-            return w;  /* Return new index and continue walking */
+            int idx2 = dir_two[i](idx);
+            maze[idx1] = maze[idx2] = 0;
+            return idx2;
         }
     }
-    w.walking = false;
-    return w;  /* Return old index and stop walking */
+    return -1;
 }
 
-index_t s_backtrack(stack_t* stack)
+int s_backtrack(stack_t* stack)
 {
     while (!stack_empty(stack))
     {
-        index_t idx = stack_pop(stack);
-        for (size_t i = 0; i < 4; i++)  /* Check adjacent cells */
+        int idx = stack_pop(stack);
+        for (int i = 0; i < 4; i++)
         {
-            index_t tidx = s_dir_one[i](idx);
-            if (maze[tidx] == 255)  /* Check if unvisited */
+            int tidx = dir_one[i](idx);
+            if (maze[tidx] == 255)
             {
-                return idx;  /* Return index with unvisited neighbour */
+                return idx;
             }
         }
     }
-    return -1;  /* Return stop values if stack is empty */
+    return -1;
 }
 
-void assign_color(uint8_t* output, index_t idx, size_t iteration, float offset)
+void assign_color(uint8_t* output, int idx, int iteration, float offset)
 {
     output[idx] = (int)255 - iteration * offset;
     output[idx + 1] = 0;
@@ -52,49 +46,47 @@ void assign_color(uint8_t* output, index_t idx, size_t iteration, float offset)
 
 void draw_path(stack_t* stack, uint8_t* output)
 {
-    size_t size = stack_size(stack);
-    index_t* index_stack = malloc(size * sizeof(index_t));
-    for (size_t i = 0; i < size; i++)
+    int size = stack_size(stack);
+    int* index_stack = malloc(size * sizeof(int));
+    for (int i = 0; i < size; i++)
     {
-        index_stack[i] = 3 * stack_pop(stack);  /* Convert stack into array */
+        index_stack[i] = 3 * stack_pop(stack);
     }
 
     float offset = (float)255 / (2 * size);
-    for (size_t i = 0; i < size - 1; i ++)  /* Draw path */
+    for (int i = 0; i < size - 1; i ++)
     {
-        index_t idx = (index_stack[i] + index_stack[i + 1]) / 2;
+        int idx = (index_stack[i] + index_stack[i + 1]) / 2;
         assign_color(output, index_stack[i], 2 * i, offset);
         assign_color(output, idx, 2 * i + 1, offset);
     }
     assign_color(output, index_stack[size - 1], 2 * (size - 1), offset);
 }
 
-void depth_first_search(uint8_t* input, uint8_t* output, size_t col_count, index_t start, index_t end)
+void depth_first_search(uint8_t* input, uint8_t* output, int col_count, int start, int end)
 {
     col_count_with_walls = 2 * col_count + 1;
     maze = input;
 
-    setup_directions(col_count_with_walls);
-    s_dir_one = get_s_dir_one();
+    initialize(col_count_with_walls);
+    dir_one = get_dir_one();
     dir_two = get_dir_two();
+
+    int idx = start;
+    maze[idx] = 0;
+
     stack_t* stack = stack_new();
-
-    walk_t w;
-    w.idx = start;
-    maze[w.idx] = 0;
-
-    while (w.idx != -1)
+    while (idx != -1)
     {
-        w.walking = true;
-        while (w.walking)
+        while (idx != -1)
         {
-            stack_push(stack, w.idx);
-            if (w.idx == end)
+            stack_push(stack, idx);
+            if (idx == end)
             {
                 return draw_path(stack, output);
             }
-            w = s_walk(w.idx);
+            idx = s_walk(idx);
         }
-        w.idx = s_backtrack(stack);
+        idx = s_backtrack(stack);
     }
 }

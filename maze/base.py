@@ -90,19 +90,19 @@ class MazeBase:
         :returns: None
         """
         pth = os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib", "maze32.dll")
+        self._dll = ctypes.cdll.LoadLibrary(pth)
+
         try:
-            self._dll = ctypes.cdll.LoadLibrary(pth)
+            ndpointer = np.ctypeslib.ndpointer(ctypes.c_uint8, flags="C_CONTIGUOUS")
         except Exception:
             raise util.MazeError("Failed loading maze32.dll from <{}>".format(pth))
 
-        ndpointer = np.ctypeslib.ndpointer(ctypes.c_uint8, flags="C_CONTIGUOUS")
-
         self._dll.recursive_backtracking.argtypes = [
-            ndpointer, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_uint32
+            ndpointer, ctypes.c_int, ctypes.c_int, ctypes.c_int
         ]
 
         self._dll.depth_first_search.argtypes = [
-            ndpointer, ndpointer, ctypes.c_size_t, ctypes.c_uint32, ctypes.c_uint32
+            ndpointer, ndpointer, ctypes.c_int, ctypes.c_int, ctypes.c_int
         ]
 
     def save_maze(self, file_name="maze.png", scale=3):

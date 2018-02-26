@@ -2,20 +2,13 @@
 
 bool stack_empty(stack_t* stack)
 {
-    if (stack == NULL || stack->top == NULL)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return stack == NULL || stack->top == NULL;
 }
 
-long stack_size(stack_t* stack)
+int stack_size(stack_t* stack)
 {
     stack_frame_t* frame = stack->top;
-    long size = 0;
+    int size = 0;
 
     while (frame != NULL)
     {
@@ -32,19 +25,19 @@ stack_t* stack_new()
     return stack;
 }
 
-index_t stack_pop(stack_t* stack)
+int stack_pop(stack_t* stack)
 {
     stack_frame_t* frame = stack->top;
-    index_t idx = (index_t)frame->idx;
+    int idx = (int)frame->idx;
     stack->top = frame->next;
     free(frame);
     return idx;
 }
 
-void stack_push(stack_t* stack, index_t idx)
+void stack_push(stack_t* stack, int idx)
 {
     stack_frame_t* frame = malloc(sizeof(stack_frame_t*));
-    frame->idx = (index_t*)idx;
+    frame->idx = (int*)idx;
     frame->next = stack->top;
     stack->top = frame;
 }
