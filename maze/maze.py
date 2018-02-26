@@ -1,5 +1,6 @@
 import numpy as np
 import collections
+import heapq
 import random
 
 import maze.util as util
@@ -118,6 +119,8 @@ class Maze(base.MazeBase):
             return self._depth_first_search(start, end)
         if algorithm == Maze.Solve.BREADTH:
             return self._breadth_first_search(start, end)
+        if algorithm == Maze.Solve.ASTAR:
+            return self._a_star(start, end)
 
         raise util.MazeError(
             "Wrong algorithm <{}>.\n"
@@ -477,7 +480,7 @@ class Maze(base.MazeBase):
         :param end: tuple of end coordinates
         :returns: None
         """
-        visited = self.maze.copy()  # List of visited cells, value of visited cell is [0, 0, 0]
+        visited = self.maze.copy()  # List of visited cells, value of visited cell is 0
         stack = collections.deque()  # List of visited cells [(x, y), ...]
 
         x, y = start
@@ -491,7 +494,7 @@ class Maze(base.MazeBase):
                 x, y = self._solve_walk(x, y, visited)
             x, y = self._solve_backtrack(stack, visited)
 
-        raise util.MazeError("No solution found")
+        raise util.MazeError("No solution found.")
 
     def _enqueue(self, queue, visited):
         """
@@ -515,10 +518,10 @@ class Maze(base.MazeBase):
         Solves a maze using breadth-first search.
 
         :param start: tuple with start coordinates
-        :param end: tuple with stop coordinates
+        :param end: tuple with end coordinates
         :returns: None
         """
-        visited = self.maze.copy()  # List of visited cells, value of visited cell is [0, 0, 0]
+        visited = self.maze.copy()  # List of visited cells, value of visited cell is 0
         queue = collections.deque()  # List of cells [cell, ...]
         cell = util.stack_empty()  # Tuple of current cell with according stack ((x, y), stack)
 
@@ -533,4 +536,32 @@ class Maze(base.MazeBase):
                 cell = util.stack_push(queue[0], end)  # Push end into cell
                 return util.draw_path(self.solution, util.stack_deque(cell))
 
-        raise util.MazeError("No solution found")
+        raise util.MazeError("No solution found.")
+
+    def _a_star(self, start, end):
+        """
+        Solves a maze using the A* algorithm.
+
+        :param start: tuple with start coordinates
+        :param end: tuple with end coordinates
+        :return: None
+        """
+        visited = self.maze.copy()  # List of visited cells, value of visited cell is 0
+        queue = []  # Priority queue [(heuristic, cost, stack), ...]
+        cell = util.stack_empty()  # Tuple of current cell with according stack ((x, y), stack)
+        heapq.heappush(queue, (0 + util.heuristic(start, end), 0, util.stack_push(cell, start)))
+        while queue:
+            _, cost, cell = heapq.heappop(queue)  # Pop cell with highest priority
+            if cell[0] == end:  # Stop if end has been found
+                cell = util.stack_push(cell, end)
+                return util.draw_path(self.solution, util.stack_deque(cell))
+            x, y = cell[0]
+            if visited[x, y, 0] == 0:
+                continue
+            visited[cell[0], 0] = 0  # Mark as visited
+            for direction in self._dir_one:
+                tx, ty = direction(*cell[0])
+                if visited[tx, ty, 0] == 255:  # Check if unvisited
+                    heapq.heappush(queue, (cost + util.heuristic(cell[0], end), cost + 1, util.stack_push(cell, (tx, ty))))
+
+        raise util.MazeError("No solution found.")

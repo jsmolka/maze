@@ -30,6 +30,7 @@ class MazeBase:
         C       = "Depth-first search C"
         DEPTH   = "Depth-first search"
         BREADTH = "Breadth-first search"
+        ASTAR   = "A* algorithm"
 
     def __init__(self):
         """
