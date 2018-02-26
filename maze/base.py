@@ -87,7 +87,7 @@ class MazeBase:
         """
         Loads C dll and sets parameter types.
 
-        :returns: none
+        :returns: None
         """
         pth = os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib", "maze32.dll")
         try:
@@ -111,7 +111,7 @@ class MazeBase:
 
         :param file_name: file name of saved file
         :param scale: upscale factor
-        :returns: none
+        :returns: None
         """
         if self.maze is None:
             raise util.MazeError(
@@ -126,7 +126,7 @@ class MazeBase:
 
         :param file_name: file name of saved file
         :param scale: upscale factor
-        :returns: none
+        :returns: None
         """
         if self.solution is None:
             raise util.MazeError(
@@ -140,7 +140,7 @@ class MazeBase:
         Loads maze from png.
 
         :param file_name: file name of file to load
-        :returns: none
+        :returns: None
         """
         if not os.path.isfile(file_name):
             raise util.MazeError("Cannot load maze because <{}> does not exist.".format(file_name))

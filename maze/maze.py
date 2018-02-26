@@ -39,7 +39,7 @@ class Maze(base.MazeBase):
         :param row_count: row count for the maze
         :param col_count: column count for the maze
         :param algorithm: algorithm used to create maze
-        :returns: none
+        :returns: None
         """
         if (row_count or col_count) <= 0:
             raise util.MazeError("Row or column count cannot be smaller than zero.")
@@ -92,7 +92,7 @@ class Maze(base.MazeBase):
         :param start: tuple with start coordinates
         :param end: tuple with end coordinates
         :param algorithm: algorithm used to solve the maze
-        :returns: none
+        :returns: None
         """
         if self.maze is None:
             raise util.MazeError(
@@ -127,7 +127,7 @@ class Maze(base.MazeBase):
         """
         Creates a maze using the recursive backtracking algorithm in C.
 
-        :returns: none
+        :returns: None
         """
         row_count, col_count = self.row_count, self.col_count
         row_count_with_walls, col_count_with_walls = self.row_count_with_walls, self.col_count_with_walls
@@ -177,7 +177,7 @@ class Maze(base.MazeBase):
         """
         Creates a maze using the recursive backtracking algorithm.
 
-        :returns: none
+        :returns: None
         """
         stack = collections.deque()  # List of visited cells [(x, y), ...]
 
@@ -204,10 +204,10 @@ class Maze(base.MazeBase):
                 for y in range(1, self.col_count_with_walls - 1, 2):
                     if self.maze[x, y, 0] == 0:  # Check if unvisited
                         finished = False
-                        for idx in self._random:  # Check adjacent cells randomly
-                            tx, ty = self._dir_two[idx](x, y)
+                        for direction in self._dir_two:  # Check adjacent cells randomly
+                            tx, ty = direction(x, y)
                             if not self._out_of_bounds(tx, ty) and self.maze[tx, ty, 0] == 255:  # Check if visited
-                                return tx, ty  # Return visited neighbour of unvisited cell
+                                return x, y  # Return visited neighbour of unvisited cell
                 if finished:
                     hunt_list.remove(x)  # Remove finished row
                     break  # Restart loop
@@ -217,7 +217,7 @@ class Maze(base.MazeBase):
         """
         Creates a maze using the hunt and kill algorithm.
 
-        :returns: none
+        :returns: None
         """
         hunt_list = list(range(1, self.row_count_with_walls - 1, 2))  # List of unfinished rows [x, ...]
 
@@ -234,7 +234,7 @@ class Maze(base.MazeBase):
         """
         Creates a maze using Eller's algorithm.
 
-        :returns: none
+        :returns: None
         """
         row_stack = [0] * self.col_count  # List of set indices [set index, ...]
         set_list = []  # List of set indices with positions [(set index, position), ...]
@@ -310,7 +310,7 @@ class Maze(base.MazeBase):
         """
         Creates a maze using the sidewinder algorithm
 
-        :returns: none
+        :returns: None
         """
         # Create first row
         for y in range(1, self.col_count_with_walls - 1):
@@ -341,7 +341,7 @@ class Maze(base.MazeBase):
         """
         Creates a maze using Prim's algorithm.
 
-        :returns: none
+        :returns: None
         """
         frontier = []  # List of unvisited cells [(x, y),...]
 
@@ -379,7 +379,7 @@ class Maze(base.MazeBase):
         """
         Creates a maze using Kruskal's algorithm.
 
-        :returns: none
+        :returns: None
         """
         xy_to_set = np.zeros((self.row_count_with_walls, self.col_count_with_walls), dtype=np.uint32)
         set_to_xy = []  # List of sets in order, set 0 at index 0 [[(x, y),...], ...]
@@ -425,7 +425,7 @@ class Maze(base.MazeBase):
 
         :param start: tuple of start coordinates
         :param end: tuple of end coordinates
-        :returns: none
+        :returns: None
         """
         start = start[0] * self.col_count_with_walls + start[1]
         end = end[0] * self.col_count_with_walls + end[1]
@@ -436,36 +436,36 @@ class Maze(base.MazeBase):
         )
         self.solution = self.solution.reshape((self.row_count_with_walls, self.col_count_with_walls, 3))
 
-    def _solve_walk(self, x, y, visited_cells):
+    def _solve_walk(self, x, y, visited):
         """
         Walks over a maze.
 
         :param x: x coordinate
         :param y: y coordinate
-        :param visited_cells: ndarray of visited cells
+        :param visited: ndarray of visited cells
         :returns: new cell
         """
         for idx in self._random:  # Check adjacent cells
-            tx, ty = self._dir_two[idx](x, y)
             bx, by = self._dir_one[idx](x, y)
-            if visited_cells[bx, by, 0] == 255:  # Check if unvisited
-                visited_cells[bx, by] = visited_cells[tx, ty] = [0, 0, 0]  # Mark as visited
+            if visited[bx, by, 0] == 255:  # Check if unvisited
+                tx, ty = self._dir_two[idx](x, y)
+                visited[bx, by, 0] = visited[tx, ty, 0] = 0  # Mark as visited
                 return tx, ty  # Return new cell
         return None, None  # Return stop values
 
-    def _solve_backtrack(self, stack, visited_cells):
+    def _solve_backtrack(self, stack, visited):
         """
         Backtracks a stacks.
 
         :param stack: stack to backtrack
-        :param visited_cells: ndarray of visited cells
+        :param visited: ndarray of visited cells
         :returns: new cell
         """
         while stack:
             x, y = stack.pop()
             for direction in self._dir_one:  # Check adjacent cells
                 tx, ty = direction(x, y)
-                if visited_cells[tx, ty, 0] == 255:  # Check if unvisited
+                if visited[tx, ty, 0] == 255:  # Check if unvisited
                     return x, y  # Return cell with unvisited neighbour
         return None, None  # Return stop values if stack is empty and no new cell was found
 
@@ -475,39 +475,39 @@ class Maze(base.MazeBase):
 
         :param start: tuple of start coordinates
         :param end: tuple of end coordinates
-        :returns: none
+        :returns: None
         """
-        visited_cells = self.maze.copy()  # List of visited cells, value of visited cell is [0, 0, 0]
+        visited = self.maze.copy()  # List of visited cells, value of visited cell is [0, 0, 0]
         stack = []  # List of visited cells [(x, y), ...]
 
         x, y = start
-        visited_cells[x, y] = [0, 0, 0]  # Mark as visited
+        visited[x, y, 0] = 0  # Mark as visited
 
         while x and y:
             while x and y:
                 stack.append((x, y))
                 if (x, y) == end:  # Stop if end has been found
                     return util.draw_path(self.solution, stack)
-                x, y = self._solve_walk(x, y, visited_cells)
-            x, y = self._solve_backtrack(stack, visited_cells)
+                x, y = self._solve_walk(x, y, visited)
+            x, y = self._solve_backtrack(stack, visited)
 
         raise util.MazeError("No solution found")
 
-    def _enqueue(self, queue, visited_cells):
+    def _enqueue(self, queue, visited):
         """
         Queues next cells.
 
         :param queue: queue for queueing
-        :param visited_cells: ndarray of visited cells
-        :returns: none
+        :param visited: ndarray of visited cells
+        :returns: None
         """
         cell = queue.popleft()
         x, y = cell[0]
         for idx in self._random:  # Check adjacent cells
             tx, ty = self._dir_two[idx](x, y)
             bx, by = self._dir_one[idx](x, y)
-            if visited_cells[bx, by, 0] == 255:  # Check if unvisited
-                visited_cells[bx, by] = visited_cells[tx, ty] = [0, 0, 0]  # Mark as visited
+            if visited[bx, by, 0] == 255:  # Check if unvisited
+                visited[bx, by] = visited[tx, ty] = [0, 0, 0]  # Mark as visited
                 queue.append(util.stack_push(cell, (tx, ty)))
 
     def _breadth_first_search(self, start, end):
@@ -516,19 +516,19 @@ class Maze(base.MazeBase):
 
         :param start: tuple with start coordinates
         :param end: tuple with stop coordinates
-        :returns: none
+        :returns: None
         """
-        visited_cells = self.maze.copy()  # List of visited cells, value of visited cell is [0, 0, 0]
+        visited = self.maze.copy()  # List of visited cells, value of visited cell is [0, 0, 0]
         queue = collections.deque()  # List of cells [cell, ...]
         cell = util.stack_empty()  # Tuple of current cell with according stack ((x, y), stack)
 
         x, y = start
         cell = util.stack_push(cell, (x, y))
         queue.append(cell)
-        visited_cells[x, y] = [0, 0, 0]  # Mark as visited
+        visited[x, y] = [0, 0, 0]  # Mark as visited
 
         while queue:
-            self._enqueue(queue, visited_cells)
+            self._enqueue(queue, visited)
             if queue[0][0] == end:  # Stop if end has been found
                 cell = util.stack_push(queue[0], end)  # Push end into cell
                 return util.draw_path(self.solution, util.stack_to_list(cell))
