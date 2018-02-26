@@ -49,7 +49,8 @@ def color(offset, iteration):
     :param iteration: current iteration
     :returns: color for current iteration
     """
-    return 0 + (iteration * offset), 0, 255 - (iteration * offset)
+    clr = iteration * offset
+    return clr, 0, 255 - clr
 
 
 def draw_path(solution, stack):

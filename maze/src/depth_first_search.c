@@ -37,30 +37,31 @@ int s_backtrack(stack_t* stack)
     return -1;
 }
 
-void assign_color(uint8_t* output, int idx, int iteration, float offset)
+void color(uint8_t* output, int idx, int iteration, float offset)
 {
-    output[idx] = (int)255 - iteration * offset;
+    int clr = (int) iteration * offset;
+    output[idx] = 255 - clr;
     output[idx + 1] = 0;
-    output[idx + 2] = (int)0 + iteration * offset;
+    output[idx + 2] = clr;
 }
 
 void draw_path(stack_t* stack, uint8_t* output)
 {
-    int size = stack_size(stack);
-    int* index_stack = malloc(size * sizeof(int));
-    for (int i = 0; i < size; i++)
-    {
-        index_stack[i] = 3 * stack_pop(stack);
-    }
+    int total = 2 * stack_size(stack);
+    float offset = (float) 255 / total;
+    int iteration = 2;
 
-    float offset = (float)255 / (2 * size);
-    for (int i = 0; i < size - 1; i ++)
+    int idx1 = stack_pop(stack);
+    color(output, 3 * idx1, 0, offset);
+    while (iteration < total)
     {
-        int idx = (index_stack[i] + index_stack[i + 1]) / 2;
-        assign_color(output, index_stack[i], 2 * i, offset);
-        assign_color(output, idx, 2 * i + 1, offset);
+        int idx2 = stack_pop(stack);
+        int idx3 = (idx1 + idx2) / 2;
+        color(output, 3 * idx2, iteration, offset);
+        color(output, 3 * idx3, iteration - 1, offset);
+        idx1 = idx2;
+        iteration += 2;
     }
-    assign_color(output, index_stack[size - 1], 2 * (size - 1), offset);
 }
 
 void depth_first_search(uint8_t* input, uint8_t* output, int col_count, int start, int end)
