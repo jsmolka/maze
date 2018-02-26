@@ -68,8 +68,8 @@ def draw_path(solution, stack):
     solution[x1, y1] = color(offset, 0)
     while iteration < total:
         x2, y2 = stack.popleft()
-        solution[x2, y2] = color(offset, iteration - 1)
-        solution[(x1 + x2) // 2, (y1 + y2) // 2] = color(offset, iteration)
+        solution[x2, y2] = color(offset, iteration)
+        solution[(x1 + x2) // 2, (y1 + y2) // 2] = color(offset, iteration - 1)
         x1, y1 = x2, y2
         iteration += 2
 
