@@ -324,8 +324,8 @@ class Maze(base.MazeBase):
                 row_stack.append(y)
 
                 if random.getrandbits(1):  # Create vertical link
-                    index = random.randint(0, len(row_stack) - 1)
-                    self.maze[x - 1, row_stack[index]] = [255, 255, 255]  # Mark as visited
+                    idx = random.randint(0, len(row_stack) - 1)
+                    self.maze[x - 1, row_stack[idx]] = [255, 255, 255]  # Mark as visited
                     row_stack = []  # Reset row stack
                 else:  # Create horizontal link
                     self.maze[x, y + 1] = [255, 255, 255]  # Mark as visited
@@ -334,8 +334,8 @@ class Maze(base.MazeBase):
             y = self.col_count_with_walls - 2
             self.maze[x, y] = [255, 255, 255]  # Mark as visited
             row_stack.append(y)
-            index = random.randint(0, len(row_stack) - 1)
-            self.maze[x - 1, row_stack[index]] = [255, 255, 255]  # Mark as visited
+            idx = random.randint(0, len(row_stack) - 1)
+            self.maze[x - 1, row_stack[idx]] = [255, 255, 255]  # Mark as visited
 
     def _prim(self):
         """
