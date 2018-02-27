@@ -1,5 +1,3 @@
-import numpy as np
-import collections
 from maze import *
 from pyprocessing import *
 
@@ -22,21 +20,27 @@ deque = collections.deque()  # List of cells with according stack [(x, y, stack)
 cell = ()  # Tuple of current cell with according stack ((x, y), stack)
 
 # Define start and end
-if start == 0:
+if not start:
     start = (0, 0)
-if end == 0:
+if not end:
     end = (row_count - 1, col_count - 1)
 start = tuple([2 * x + 1 for x in start])
 end = tuple([2 * x + 1 for x in end])
 
 
-def push(stack, item):
-    """Pushes item into spaghetti stack"""
+def stack_push(stack, item):
+    """
+    Pushes item into spaghetti stack.
+
+    :param stack: stack to push into
+    :param item: item to push into stack
+    :returns: stack with pushed item
+    """
     return item, stack
 
 
 x, y = start
-cell = push(cell, (x, y))
+cell = stack_push(cell, (x, y))
 deque.append(cell)
 visited_cells[x, y] = [0, 0, 0]  # Mark as visited
 
@@ -46,77 +50,108 @@ current_cells.append((x, y))
 
 found = False
 
+dir_one = [
+    lambda x, y: (x + 1, y),
+    lambda x, y: (x - 1, y),
+    lambda x, y: (x, y - 1),
+    lambda x, y: (x, y + 1)
+]
+
 dir_two = [
-    lambda x, y: (x + 2, y, x + 1, y),
-    lambda x, y: (x - 2, y, x - 1, y),
-    lambda x, y: (x, y - 2, x, y - 1),
-    lambda x, y: (x, y + 2, x, y + 1)
+    lambda x, y: (x + 2, y),
+    lambda x, y: (x - 2, y),
+    lambda x, y: (x, y - 2),
+    lambda x, y: (x, y + 2)
 ]
 
 
-def stack_to_list(stack):
-    """Converts spaghetti stack into list"""
-    l = []
+def stack_deque(stack):
+    """
+    Converts spaghetti stack into deque.
+
+    :param stack: stack to be converted
+    :returns: stack as list
+    """
+    deque = collections.deque()
     while stack:
         item, stack = stack
-        l.append(item)
-    return l[::-1]
+        deque.appendleft(item)
+    return deque
 
 
 def enqueue():
-    """Queues next cells"""
-    global deque, visited_cells, dir_two, current_cells
+    """
+    Queues next cells.
+
+    :returns: None
+    """
+    global deque, visited_cells, dir_one, dir_two, current_cells
     cell = deque.popleft()
     x, y = cell[0]
-    for direction in dir_two:  # Check adjacent cells
-        tx, ty, bx, by = direction(x, y)
+    for idx in range(4):  # Check adjacent cells
+        bx, by = dir_one[idx](x, y)
         if visited_cells[bx, by, 0] == 255:  # Check if unvisited
+            tx, ty = dir_two[idx](x, y)
             visited_cells[bx, by] = visited_cells[tx, ty] = [0, 0, 0]  # Mark as visited
             current_cells.extend([(bx, by), (tx, ty)])
-            deque.append(push(cell, (tx, ty)))
+            deque.append(stack_push(cell, (tx, ty)))
 
 
 def draw_maze():
-    """Draws maze"""
+    """
+    Draws maze.
+
+    :returns: None
+    """
     global m, row_count_with_walls, col_count_with_walls, scale
     fill(255)
-    for x in range(0, row_count_with_walls):
-        for y in range(0, col_count_with_walls):
+    for x in range(row_count_with_walls):
+        for y in range(col_count_with_walls):
             if m.maze[x, y, 0] == 255:
                 rect(y * scale, x * scale, scale, scale)
 
 
 def color(iteration_):
-    """Returns color for current iteration"""
+    """
+    Returns color for current iteration.
+
+    :param iteration_: current iteration
+    :returns: current color
+    """
     global offset
-    return [0 + (iteration_ * offset), 0, 255 - (iteration_ * offset)]
+    clr = iteration_ * offset
+    return clr, 0, 255 - clr
 
 
 def draw_stack():
-    """Draws stack"""
-    global x, y, offset, iteration, scale
-    if iteration < len(stack) - 1:  # Draw incomplete stack
-        x1, y1 = tuple(stack[iteration])
-        x2, y2 = tuple(stack[iteration + 1])
-        r, g, b = color(2 * iteration)
-        fill(r, g, b)
-        rect(y1 * scale, x1 * scale, scale, scale)
-        x3, y3 = int((x1 + x2) / 2), int((y1 + y2) / 2)
-        r, g, b = color(2 * iteration + 1)
-        fill(r, g, b)
-        rect(y3 * scale, x3 * scale, scale, scale)
-    else:
-        x, y = tuple(stack[-1])
-        r, g, b = color(2 * (len(stack) - 1))
-        fill(r, g, b)
+    """
+    Draws stack.
+
+    :returns: None
+    """
+    global x, y, offset, iteration, total, scale
+    if iteration == 0:
+        x, y = stack.popleft()
+        fill(*color(0))
         rect(y * scale, x * scale, scale, scale)
-    if iteration == len(stack):
+    if iteration < total and iteration != 0:  # Draw incomplete stack
+        x2, y2 = stack.popleft()
+        fill(*color(iteration))
+        rect(y2 * scale, x2 * scale, scale, scale)
+        fill(*color(iteration - 1))
+        rect((y + y2) // 2 * scale, (x + x2) // 2 * scale, scale, scale)
+        x, y = x2, y2
+    if iteration >= total:
         noLoop()
-    iteration += 1
+    iteration += 2
 
 
 def draw_cells():
-    """Draws cells"""
+    """
+    Draws cells.
+
+    :returns: None
+    """
     global found, current_cells, last_cells, scale
     fill(0, 255, 0)
     for x, y in current_cells:
@@ -132,6 +167,11 @@ def draw_cells():
 
 
 def setup():
+    """
+    Setup function.
+
+    :returns: None
+    """
     global row_count_with_walls, col_count_with_walls, scale
     size(col_count_with_walls * scale, row_count_with_walls * scale, caption=Maze.Solve.BREADTH.value)
     background(0)
@@ -140,14 +180,20 @@ def setup():
 
 
 def draw():
-    global deque, stack, end, offset, iteration, found
+    """
+    Draw function.
+
+    :returns: None
+    """
+    global deque, stack, end, offset, iteration, total, found
     if not found:
         enqueue()
         if deque[0][0] == end:  # Stop if end has been found
             found = True
-            cell = push(deque[0], end)  # Push end into cell
-            stack = stack_to_list(cell)
-            offset, iteration = 255 / (2 * len(stack)), 0
+            cell = stack_push(deque[0], end)  # Push end into cell
+            stack = stack_deque(cell)
+            total = 2 * len(stack)
+            offset, iteration = 255 / total, 0
         draw_cells()
     else:
         draw_stack()

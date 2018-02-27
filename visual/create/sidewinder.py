@@ -23,7 +23,11 @@ y = 1  # Cell index
 
 
 def create_first_row():
-    """Creates first row"""
+    """
+    Creates first row.
+
+    :returns: None
+    """
     global x, y, col_count_with_walls, first_row, current_cells
     if y == 1:  # Three cells to start because column number is uneven
         current_cells = [(1, y), (1, y + 1), (1, y + 2)]
@@ -31,7 +35,6 @@ def create_first_row():
     else:
         current_cells = [(1, y), (1, y + 1)]
         y += 2
-
     if y == col_count_with_walls - 1:
         y = 1
         x += 2
@@ -39,27 +42,30 @@ def create_first_row():
 
 
 def create_cells():
-    """Creates cells"""
+    """
+    Creates cells.
+
+    :returns: None
+    """
     global x, y, maze, row_stack, row_count_with_walls, col_count_with_walls, finished, current_cells
     maze[x, y] = [255, 255, 255]
     row_stack.append(y)
 
     if y != col_count_with_walls - 2:
-        if bool(random.getrandbits(1)):  # Create vertical link
-            index = random.randint(0, len(row_stack) - 1)
-            maze[x - 1, row_stack[index]] = [255, 255, 255]  # Mark as visited
-            link = (x - 1, row_stack[index])
+        if random.getrandbits(1):  # Create vertical link
+            idx = random.randint(0, len(row_stack) - 1)
+            maze[x - 1, row_stack[idx]] = [255, 255, 255]  # Mark as visited
+            link = (x - 1, row_stack[idx])
             row_stack = []  # Reset row stack
         else:  # Create horizontal link
             maze[x, y + 1] = [255, 255, 255]  # Mark as visited
             link = (x, y + 1)
     else:  # Create link if last cell
-        index = random.randint(0, len(row_stack) - 1)
-        maze[x - 1, row_stack[index]] = [255, 255, 255]
-        link = (x - 1, row_stack[index])
+        idx = random.randint(0, len(row_stack) - 1)
+        maze[x - 1, row_stack[idx]] = [255, 255, 255]
+        link = (x - 1, row_stack[idx])
 
     current_cells = [(x, y), link]
-
     if x == row_count_with_walls - 2 and y == col_count_with_walls - 2:  # End condition
         finished = True
 
@@ -73,7 +79,11 @@ def create_cells():
 
 
 def draw_cells():
-    """Draws cells"""
+    """
+    Draws cells.
+
+    :returns: None
+    """
     global finished, current_cells, last_cells, scale
     fill(0, 255, 0)
     for x, y in current_cells:
@@ -89,6 +99,11 @@ def draw_cells():
 
 
 def setup():
+    """
+    Setup function.
+
+    :returns: None
+    """
     global row_count_with_walls, col_count_with_walls, scale
     size(col_count_with_walls * scale, row_count_with_walls * scale, caption="Sidewinder algorithm")
     background(0)
@@ -96,6 +111,11 @@ def setup():
 
 
 def draw():
+    """
+    Draw function.
+
+    :returns: None
+    """
     global first_row
     if first_row:
         create_first_row()

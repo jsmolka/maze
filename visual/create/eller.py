@@ -1,4 +1,5 @@
 import numpy as np
+import collections
 import random
 from pyprocessing import *
 
@@ -13,7 +14,7 @@ col_count_with_walls = 2 * col_count + 1
 maze = np.zeros((row_count_with_walls, col_count_with_walls, 3), dtype=np.uint8)  # Height, width, RGB
 row_stack = [0] * col_count  # List of set indices [set index, ...]
 set_list = []  # List of set indices with positions [(set index, position), ...]
-connect_list = []  # List of connections between cells [True, ...]
+connect_list = collections.deque()  # List of connections between cells [True, ...]
 
 set_index = 1
 finished = False
@@ -28,16 +29,20 @@ y = 0  # Column index
 
 
 def create_row_stack():
-    """Creates row stack"""
+    """
+    Creates row stack.
+
+    :returns: None
+    """
     global col_count, row_stack, connect_list, set_index
-    connect_list = []
+    connect_list = collections.deque()
 
     if row_stack[0] == 0:  # Define first cell in row
         row_stack[0] = set_index
         set_index += 1
 
     for y in range(1, col_count):  # Define other cells in ro
-        if bool(random.getrandbits(1)):  # Connect cells
+        if random.getrandbits(1):  # Connect cells
             if row_stack[y] != 0:  # Connect cell with previous cell
                 old_index = row_stack[y]
                 new_index = row_stack[y - 1]
@@ -57,7 +62,11 @@ def create_row_stack():
 
 
 def create_cells():
-    """Creates current cells list"""
+    """
+    Creates current cells list.
+
+    :returns: None
+    """
     global x, y, row_count_with_walls, col_count, set_list, row_stack, connect_list, set_index, creating_cells, finished, current_cells
     current_cells = []
 
@@ -93,7 +102,11 @@ def create_cells():
 
 
 def create_links():
-    """Creates links"""
+    """
+    Creates links.
+
+    :returns: None
+    """
     global x, col_count, row_stack, set_list, creating_cells, already_sorted, current_cells
     if not already_sorted:
         row_stack = [0] * col_count  # Reset row stack
@@ -109,7 +122,7 @@ def create_links():
     linked = False
     while not linked:  # Create at least one link for each set index
         for sub_set_item in sub_set_list:
-            if bool(random.getrandbits(1)):  # Create link
+            if random.getrandbits(1):  # Create link
                 linked = True
                 link_set, link_position = sub_set_item
 
@@ -125,7 +138,11 @@ def create_links():
 
 
 def draw_cells():
-    """Draws cells"""
+    """
+    Draws cells.
+
+    :returns: None
+    """
     global finished, current_cells, last_cells, scale
     fill(0, 255, 0)
     for x, y in current_cells:
@@ -141,6 +158,11 @@ def draw_cells():
 
 
 def setup():
+    """
+    Setup function.
+
+    :returns: None
+    """
     global row_count_with_walls, col_count_with_walls, scale
     size(col_count_with_walls * scale, row_count_with_walls * scale, caption="Eller's algorithm")
     background(0)
@@ -149,6 +171,11 @@ def setup():
 
 
 def draw():
+    """
+    Draw function.
+
+    :returns: None
+    """
     global creating_cells
     if creating_cells:
         create_cells()

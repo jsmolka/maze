@@ -19,6 +19,7 @@ maze[x, y] = [255, 255, 255]
 current_cells = []  # List of cells [(x, y), ...]
 last_cells = []  # List of cells [(x, y), ...]
 current_cells.append((x, y))
+_range = list(range(4))
 
 iteration = 1  # Saves number of current iteration
 last_iteration = 1  # Saves number of last iteration
@@ -26,40 +27,53 @@ last_iteration = 1  # Saves number of last iteration
 walking = True
 finished = False
 
-c_dir_one = [
+dir_one = [
+    lambda x, y: (x + 1, y),
+    lambda x, y: (x - 1, y),
+    lambda x, y: (x, y - 1),
+    lambda x, y: (x, y + 1)
+]
+
+dir_two = [
     lambda x, y: (x + 2, y),
     lambda x, y: (x - 2, y),
     lambda x, y: (x, y - 2),
     lambda x, y: (x, y + 2)
 ]
 
-dir_two = [
-    lambda x, y: (x + 2, y, x + 1, y),
-    lambda x, y: (x - 2, y, x - 1, y),
-    lambda x, y: (x, y - 2, x, y - 1),
-    lambda x, y: (x, y + 2, x, y + 1)
-]
 
+def _random():
+    """
+    Shuffles range.
 
-def shuffled(l):
-    """Returns shuffled list"""
-    result = l[:]
-    random.shuffle(result)
-    return result
+    :return: None
+    """
+    global _range
+    random.shuffle(_range)
+    return _range
 
 
 def out_of_bounds(x, y):
-    """Checks if indices are out of bounds"""
+    """
+    Checks if indices are out of bounds.
+
+    :returns: None
+    """
     global row_count_with_walls, col_count_with_walls
-    return True if x < 0 or y < 0 or x >= row_count_with_walls or y >= col_count_with_walls else False
+    return x < 0 or y < 0 or x >= row_count_with_walls or y >= col_count_with_walls
 
 
 def walk():
-    """Walks over maze"""
-    global x, y, maze, dir_two, iteration, walking, current_cells
-    for direction in shuffled(dir_two):  # Check adjacent cells randomly
-        tx, ty, bx, by = direction(x, y)
+    """
+    Walks over maze.
+
+    :returns: None
+    """
+    global x, y, maze, dir_one, dir_one, dir_two, iteration, walking, current_cells
+    for idx in _random():  # Check adjacent cells randomly
+        tx, ty = dir_two[idx](x, y)
         if not out_of_bounds(tx, ty) and maze[tx, ty, 0] == 0:  # Check if unvisited
+            bx, by = dir_one[idx](x, y)
             maze[tx, ty] = maze[bx, by] = [255, 255, 255]  # Mark as visited
             current_cells.append((bx, by))
             x, y, walking = tx, ty, True
@@ -69,12 +83,16 @@ def walk():
 
 
 def hunt():
-    """Scans maze for new position"""
-    global x, y, row_count_with_walls, col_count_with_walls, maze, c_dir_one, iteration, last_iteration, walking, finished
+    """
+    Scans maze for new position.
+
+    :returns: None
+    """
+    global x, y, row_count_with_walls, col_count_with_walls, maze, dir_two, iteration, last_iteration, walking, finished
     x = iteration
     for y in range(1, col_count_with_walls - 1, 2):
         if maze[x, y, 0] == 0:  # Check if unvisited
-            for direction in shuffled(c_dir_one):  # Check adjacent cells randomly
+            for direction in dir_two:  # Check adjacent cells
                 tx, ty = direction(x, y)
                 if not out_of_bounds(tx, ty) and maze[tx, ty, 0] == 255:  # Check if visited
                     x, y, walking = tx, ty, True
@@ -87,7 +105,11 @@ def hunt():
 
 
 def draw_cells():
-    """Draws cells"""
+    """
+    Draws cells.
+
+    :returns: None
+    """
     global finished, current_cells, last_cells, scale
     fill(0, 255, 0)
     for x, y in current_cells:
@@ -108,22 +130,26 @@ def draw_cells():
 
 
 def draw_row():
-    """Draws row"""
+    """
+    Draws row.
+
+    :returns: None
+    """
     global maze, iteration, last_iteration, walking, finished, scale
     if not walking:  # Draw green line
-        for i in range(0, len(maze[0])):  # Redraw previous row
+        for i in range(len(maze[0])):  # Redraw previous row
             color = maze[last_iteration, i]
             fill(color[0], color[1], color[2])
             rect(i * scale, last_iteration * scale, scale, scale)
         fill(0, 255, 0)  # Draw green line
         rect(0, iteration * scale, len(maze[0]) * scale, scale)
     if walking:  # Remove last green line after hunting finished
-        for i in range(0, len(maze[0])):
+        for i in range(len(maze[0])):
             color = maze[iteration, i]
             fill(color[0], color[1], color[2])
             rect(i * scale, iteration * scale, scale, scale)
     if finished:  # Redraw last row
-        for i in range(0, len(maze[0])):
+        for i in range(len(maze[0])):
             color = maze[len(maze) - 2, i]
             fill(color[0], color[1], color[2])
             rect(i * scale, (len(maze) - 2) * scale, scale, scale)
@@ -131,6 +157,11 @@ def draw_row():
 
 
 def setup():
+    """
+    Setup function.
+
+    :returns: None
+    """
     global row_count_with_walls, col_count_with_walls, scale
     size(col_count_with_walls * scale, row_count_with_walls * scale, caption="Hunt and kill algorithm")
     background(0)
@@ -138,6 +169,11 @@ def setup():
 
 
 def draw():
+    """
+    Draw function.
+
+    :returns: None
+    """
     global walking, current_cells
     if walking:
         walk()

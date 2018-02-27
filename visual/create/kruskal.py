@@ -1,4 +1,5 @@
 import numpy as np
+import collections
 import random
 from pyprocessing import *
 
@@ -13,7 +14,7 @@ col_count_with_walls = 2 * col_count + 1
 maze = np.zeros((row_count_with_walls, col_count_with_walls, 3), dtype=np.uint8)
 xy_to_set = np.zeros((row_count_with_walls, col_count_with_walls), dtype=np.uint32)
 set_to_xy = []  # List of sets in order, set 0 at index 0 [[(x, y),...], ...]
-edges = []  # List of possible edges [(x, y, direction), ...]
+edges = collections.deque()  # List of possible edges [(x, y, direction), ...]
 
 last_edge = []  # List of cells [(x, y), ...]
 current_edge = []  # List of cells [(x, y), ...]
@@ -21,9 +22,13 @@ finished = False
 
 
 def out_of_bounds(x, y):
-    """Checks if indices are out of bounds"""
+    """
+    Checks if indices are out of bounds.
+
+    :returns: indices outside maze
+    """
     global row_count_with_walls, col_count_with_walls
-    return True if x < 0 or y < 0 or x >= row_count_with_walls or y >= col_count_with_walls else False
+    return x < 0 or y < 0 or x >= row_count_with_walls or y >= col_count_with_walls
 
 
 set_index = 0
@@ -44,7 +49,11 @@ random.shuffle(edges)
 
 
 def choose_edge():
-    """Chooses edge to be drawn"""
+    """
+    Chooses edge to be drawn.
+
+    :returns: None
+    """
     global maze, edges, xy_to_set, set_to_xy, finished, current_edge
     chosen = False
     while not chosen:
@@ -74,7 +83,11 @@ def choose_edge():
 
 
 def draw_edge():
-    """Draws edge"""
+    """
+    Draws edge.
+
+    :returns: None
+    """
     global finished, current_edge, last_edge, scale
     fill(0, 255, 0)
     for x, y in current_edge:
@@ -91,6 +104,11 @@ def draw_edge():
 
 
 def setup():
+    """
+    Setup function.
+
+    :returns: None
+    """
     global row_count_with_walls, col_count_with_walls, scale
     size(col_count_with_walls * scale, row_count_with_walls * scale, caption="Kruskal's algorithm")
     background(0)
@@ -98,6 +116,11 @@ def setup():
 
 
 def draw():
+    """
+    Draw function.
+
+    :returns: None
+    """
     choose_edge()
     draw_edge()
 
