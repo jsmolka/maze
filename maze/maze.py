@@ -355,7 +355,7 @@ class Maze(base.MazeBase):
             tx, ty = direction(x, y)
             if not self._out_of_bounds(tx, ty):
                 frontier.append((tx, ty))
-                self.maze[tx, ty] = [1, 1, 1]  # Mark as part of frontier
+                self.maze[tx, ty, 0] = 1  # Mark as part of frontier
 
         # Add and connect cells until frontier is empty
         while frontier:
@@ -373,7 +373,7 @@ class Maze(base.MazeBase):
                 tx, ty = direction(x, y)
                 if not self._out_of_bounds(tx, ty) and self.maze[tx, ty, 0] == 0:  # Check if unvisited
                     frontier.append((tx, ty))
-                    self.maze[tx, ty] = [1, 1, 1]  # Mark as part of frontier
+                    self.maze[tx, ty, 0] = 1  # Mark as part of frontier
 
     def _kruskal(self):
         """
