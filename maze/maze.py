@@ -204,7 +204,7 @@ class Maze(base.MazeBase):
                 for y in range(1, self.col_count_with_walls - 1, 2):
                     if self.maze[x, y, 0] == 0:  # Check if unvisited
                         finished = False
-                        for direction in self._dir_two:  # Check adjacent cells randomly
+                        for direction in self._dir_two:  # Check adjacent cells
                             tx, ty = direction(x, y)
                             if not self._out_of_bounds(tx, ty) and self.maze[tx, ty, 0] == 255:  # Check if visited
                                 return x, y  # Return visited neighbour of unvisited cell
@@ -268,7 +268,7 @@ class Maze(base.MazeBase):
                     connect_list.append(False)
 
             # Create set list and fill cells
-            for y in range(0, self.col_count):
+            for y in range(self.col_count):
                 maze_col = 2 * y + 1
                 set_list.append((row_stack[y], maze_col))
 
@@ -503,7 +503,7 @@ class Maze(base.MazeBase):
         """
         cell = queue.popleft()
         x, y = cell[0]
-        for idx in self._random:  # Check adjacent cells
+        for idx in range(4):  # Check adjacent cells
             bx, by = self._dir_one[idx](x, y)
             if visited[bx, by, 0] == 255:  # Check if unvisited
                 tx, ty = self._dir_two[idx](x, y)
