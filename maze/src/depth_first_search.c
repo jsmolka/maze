@@ -67,13 +67,14 @@ void draw_path(stack_t* stack, uint8_t* output)
 void depth_first_search(uint8_t* input, uint8_t* output, int col_count, int start, int end)
 {
     col_count_with_walls = 2 * col_count + 1;
-    maze = input;
 
     initialize(col_count_with_walls);
     dir_one = get_dir_one();
     dir_two = get_dir_two();
 
     int idx = start;
+
+    maze = input;
     maze[idx] = 0;
 
     stack_t* stack = stack_new();

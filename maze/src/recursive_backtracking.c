@@ -6,11 +6,11 @@ dir_t* dir_two;
 int* range;
 int row_count_with_walls;
 int col_count_with_walls;
-int max_index;
+int max_idx;
 
 bool out_ouf_bounds(int idx)
 {
-    return idx >= max_index || (idx % col_count_with_walls) % 2 == 0;
+    return idx >= max_idx || (idx % col_count_with_walls) % 2 == 0;
 }
 
 int c_walk(int idx)
@@ -53,8 +53,7 @@ void recursive_backtracking(uint8_t* input, int row_count, int col_count, int id
 
     row_count_with_walls = 2 * row_count + 1;
     col_count_with_walls = 2 * col_count + 1;
-    max_index = row_count_with_walls * col_count_with_walls;
-    maze = input;
+    max_idx = row_count_with_walls * col_count_with_walls;
 
     initialize(col_count_with_walls);
     dir_one = get_dir_one();
@@ -66,7 +65,9 @@ void recursive_backtracking(uint8_t* input, int row_count, int col_count, int id
     range[2] = 2;
     range[3] = 3;
 
+    maze = input;
     maze[idx] = 255;
+    
     stack_t* stack = stack_new();
     while (idx != -1)
     {
