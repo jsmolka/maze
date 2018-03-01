@@ -56,7 +56,7 @@ def out_of_bounds(x, y):
     """
     Checks if indices are out of bounds.
 
-    :returns: indices outside maze
+    :return: bool
     """
     global row_count_with_walls, col_count_with_walls
     return x < 0 or y < 0 or x >= row_count_with_walls or y >= col_count_with_walls
@@ -66,7 +66,7 @@ def walk():
     """
     Walks over maze.
 
-    :returns: None
+    :return: None
     """
     global x, y, maze, dir_one, dir_two, walking, current_cells
     for idx in _random():  # Check adjacent cells randomly
@@ -84,7 +84,7 @@ def backtrack():
     """
     Backtracks stack.
 
-    :returns: None
+    :return: None
     """
     global x, y, maze, stack, dir_two, walking, finished
     x, y = stack.pop()
@@ -102,7 +102,7 @@ def draw_cells():
     """
     Draws cells.
 
-    :returns: None
+    :return: None
     """
     global finished, current_cells, last_cells, scale
     fill(0, 255, 0)
@@ -123,7 +123,7 @@ def setup():
     """
     Setup function.
 
-    :returns: None
+    :return: None
     """
     global row_count_with_walls, col_count_with_walls, scale
     size(col_count_with_walls * scale, row_count_with_walls * scale, caption="Recursive backtracking algorithm")
@@ -135,7 +135,7 @@ def draw():
     """
     Draw function.
 
-    :returns: None
+    :return: None
     """
     global x, y, stack, walking, current_cells
     if walking:

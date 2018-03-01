@@ -34,7 +34,7 @@ def stack_push(stack, item):
 
     :param stack: stack to push into
     :param item: item to push into stack
-    :returns: stack with pushed item
+    :return: tuple
     """
     return item, stack
 
@@ -70,7 +70,7 @@ def stack_deque(stack):
     Converts spaghetti stack into deque.
 
     :param stack: stack to be converted
-    :returns: stack as list
+    :return: deque
     """
     deque = collections.deque()
     while stack:
@@ -83,7 +83,7 @@ def enqueue():
     """
     Queues next cells.
 
-    :returns: None
+    :return: None
     """
     global deque, visited_cells, dir_one, dir_two, current_cells
     cell = deque.popleft()
@@ -101,7 +101,7 @@ def draw_maze():
     """
     Draws maze.
 
-    :returns: None
+    :return: None
     """
     global m, row_count_with_walls, col_count_with_walls, scale
     fill(255)
@@ -116,7 +116,7 @@ def color(iteration_):
     Returns color for current iteration.
 
     :param iteration_: current iteration
-    :returns: current color
+    :return: tuple
     """
     global offset
     clr = iteration_ * offset
@@ -127,7 +127,7 @@ def draw_stack():
     """
     Draws stack.
 
-    :returns: None
+    :return: None
     """
     global x, y, offset, iteration, total, scale
     if iteration == 0:
@@ -150,7 +150,7 @@ def draw_cells():
     """
     Draws cells.
 
-    :returns: None
+    :return: None
     """
     global found, current_cells, last_cells, scale
     fill(0, 255, 0)
@@ -170,7 +170,7 @@ def setup():
     """
     Setup function.
 
-    :returns: None
+    :return: None
     """
     global row_count_with_walls, col_count_with_walls, scale
     size(col_count_with_walls * scale, row_count_with_walls * scale, caption=Maze.Solve.BREADTH.value)
@@ -183,7 +183,7 @@ def draw():
     """
     Draw function.
 
-    :returns: None
+    :return: None
     """
     global deque, stack, end, offset, iteration, total, found
     if not found:

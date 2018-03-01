@@ -57,7 +57,7 @@ def out_of_bounds(x, y):
     """
     Checks if indices are out of bounds.
 
-    :returns: None
+    :return: None
     """
     global row_count_with_walls, col_count_with_walls
     return x < 0 or y < 0 or x >= row_count_with_walls or y >= col_count_with_walls
@@ -67,7 +67,7 @@ def walk():
     """
     Walks over maze.
 
-    :returns: None
+    :return: None
     """
     global x, y, maze, dir_one, dir_one, dir_two, iteration, walking, current_cells
     for idx in _random():  # Check adjacent cells randomly
@@ -86,7 +86,7 @@ def hunt():
     """
     Scans maze for new position.
 
-    :returns: None
+    :return: None
     """
     global x, y, row_count_with_walls, col_count_with_walls, maze, dir_two, iteration, last_iteration, walking, finished
     x = iteration
@@ -108,7 +108,7 @@ def draw_cells():
     """
     Draws cells.
 
-    :returns: None
+    :return: None
     """
     global finished, current_cells, last_cells, scale
     fill(0, 255, 0)
@@ -133,7 +133,7 @@ def draw_row():
     """
     Draws row.
 
-    :returns: None
+    :return: None
     """
     global maze, iteration, last_iteration, walking, finished, scale
     if not walking:  # Draw green line
@@ -160,7 +160,7 @@ def setup():
     """
     Setup function.
 
-    :returns: None
+    :return: None
     """
     global row_count_with_walls, col_count_with_walls, scale
     size(col_count_with_walls * scale, row_count_with_walls * scale, caption="Hunt and kill algorithm")
@@ -172,7 +172,7 @@ def draw():
     """
     Draw function.
 
-    :returns: None
+    :return: None
     """
     global walking, current_cells
     if walking:

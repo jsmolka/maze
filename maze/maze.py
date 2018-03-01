@@ -14,7 +14,7 @@ class Maze(base.MazeBase):
         """
         Constructor.
 
-        :returns: instance of Maze
+        :return: new Maze
         """
         super(Maze, self).__init__()
 
@@ -39,7 +39,7 @@ class Maze(base.MazeBase):
         :param row_count: row count for the maze
         :param col_count: column count for the maze
         :param algorithm: algorithm used to create maze
-        :returns: None
+        :return: None
         """
         if (row_count or col_count) <= 0:
             raise utils.MazeError("Row or column count cannot be smaller than zero.")
@@ -70,7 +70,7 @@ class Maze(base.MazeBase):
         """
         Random range to iterate over.
 
-        :returns: random range
+        :return: list
         """
         random.shuffle(self._range)
         return self._range
@@ -81,7 +81,7 @@ class Maze(base.MazeBase):
 
         :param x: x coordinate within the maze
         :param y: y coordinate within the maze
-        :returns: x and y within maze
+        :return: bool
         """
         return x < 0 or y < 0 or x >= self.row_count_with_walls or y >= self.col_count_with_walls
 
@@ -92,7 +92,7 @@ class Maze(base.MazeBase):
         :param start: tuple with start coordinates
         :param end: tuple with end coordinates
         :param algorithm: algorithm used to solve the maze
-        :returns: None
+        :return: None
         """
         if self.maze is None:
             raise utils.MazeError(
@@ -127,7 +127,7 @@ class Maze(base.MazeBase):
         """
         Creates a maze using the recursive backtracking algorithm in C.
 
-        :returns: None
+        :return: None
         """
         row_count, col_count = self.row_count, self.col_count
         row_count_with_walls, col_count_with_walls = self.row_count_with_walls, self.col_count_with_walls
@@ -149,7 +149,7 @@ class Maze(base.MazeBase):
 
         :param x: x coordinate
         :param y: y coordinate
-        :returns: new cell
+        :return: tuple
         """
         for idx in self._random:  # Check adjacent cells randomly
             tx, ty = self._dir_two[idx](x, y)
@@ -163,7 +163,7 @@ class Maze(base.MazeBase):
         Backtracks the stack until walking is possible again.
 
         :param stack: stack with walked over cells
-        :returns: new cell
+        :return: tuple
         """
         while stack:
             x, y = stack.pop()
@@ -177,7 +177,7 @@ class Maze(base.MazeBase):
         """
         Creates a maze using the recursive backtracking algorithm.
 
-        :returns: None
+        :return: None
         """
         stack = collections.deque()  # List of visited cells [(x, y), ...]
 
@@ -196,7 +196,7 @@ class Maze(base.MazeBase):
         Scans maze for new position.
 
         :param hunt_list: list of unfinished rows
-        :returns: new cell
+        :return: tuple
         """
         while hunt_list:
             for x in hunt_list:
@@ -217,7 +217,7 @@ class Maze(base.MazeBase):
         """
         Creates a maze using the hunt and kill algorithm.
 
-        :returns: None
+        :return: None
         """
         hunt_list = list(range(1, self.row_count_with_walls - 1, 2))  # List of unfinished rows [x, ...]
 
@@ -234,7 +234,7 @@ class Maze(base.MazeBase):
         """
         Creates a maze using Eller's algorithm.
 
-        :returns: None
+        :return: None
         """
         row_stack = [0] * self.col_count  # List of set indices [set index, ...]
         set_list = []  # List of set indices with positions [(set index, position), ...]
@@ -310,7 +310,7 @@ class Maze(base.MazeBase):
         """
         Creates a maze using the sidewinder algorithm
 
-        :returns: None
+        :return: None
         """
         # Create first row
         for y in range(1, self.col_count_with_walls - 1):
@@ -341,7 +341,7 @@ class Maze(base.MazeBase):
         """
         Creates a maze using Prim's algorithm.
 
-        :returns: None
+        :return: None
         """
         frontier = []  # List of unvisited cells [(x, y),...]
 
@@ -379,7 +379,7 @@ class Maze(base.MazeBase):
         """
         Creates a maze using Kruskal's algorithm.
 
-        :returns: None
+        :return: None
         """
         xy_to_set = np.zeros((self.row_count_with_walls, self.col_count_with_walls), dtype=np.uint32)
         set_to_xy = []  # List of sets in order, set 0 at index 0 [[(x, y),...], ...]
@@ -425,7 +425,7 @@ class Maze(base.MazeBase):
 
         :param start: tuple of start coordinates
         :param end: tuple of end coordinates
-        :returns: None
+        :return: None
         """
         start = start[0] * self.col_count_with_walls + start[1]
         end = end[0] * self.col_count_with_walls + end[1]
@@ -443,7 +443,7 @@ class Maze(base.MazeBase):
         :param x: x coordinate
         :param y: y coordinate
         :param visited: ndarray of visited cells
-        :returns: new cell
+        :return: tuple
         """
         for idx in range(4):  # Check adjacent cells
             bx, by = self._dir_one[idx](x, y)
@@ -459,7 +459,7 @@ class Maze(base.MazeBase):
 
         :param stack: stack to backtrack
         :param visited: ndarray of visited cells
-        :returns: new cell
+        :return: tuple
         """
         while stack:
             x, y = stack.pop()
@@ -475,7 +475,7 @@ class Maze(base.MazeBase):
 
         :param start: tuple of start coordinates
         :param end: tuple of end coordinates
-        :returns: None
+        :return: None
         """
         visited = self.maze.copy()  # List of visited cells, value of visited cell is 0
         stack = collections.deque()  # List of visited cells [(x, y), ...]
@@ -499,7 +499,7 @@ class Maze(base.MazeBase):
 
         :param queue: queue for queueing
         :param visited: ndarray of visited cells
-        :returns: None
+        :return: None
         """
         cell = queue.popleft()
         x, y = cell[0]
@@ -516,7 +516,7 @@ class Maze(base.MazeBase):
 
         :param start: tuple with start coordinates
         :param end: tuple with end coordinates
-        :returns: None
+        :return: None
         """
         visited = self.maze.copy()  # List of visited cells, value of visited cell is 0
         queue = collections.deque()  # List of cells [cell, ...]

@@ -57,7 +57,7 @@ def walk():
     """
     Walks over maze.
 
-    :returns: None
+    :return: None
     """
     global x, y, stack, visited_cells, dir_one, dir_two, walking, first_time, current_cells
     for idx in range(4):  # Check adjacent cells
@@ -76,7 +76,7 @@ def backtrack():
     """
     Backtracks stack.
 
-    :returns: None
+    :return: None
     """
     global x, y, stack, visited_cells, walking, first_time
     if first_time:  # Compensate for first backtrack after walking
@@ -95,7 +95,7 @@ def draw_maze():
     """
     Draws maze.
 
-    :returns: None
+    :return: None
     """
     global m, row_count_with_walls, col_count_with_walls, scale
     fill(255)
@@ -110,7 +110,7 @@ def color(iteration_):
     Returns color for current iteration.
 
     :param iteration_: current iteration
-    :returns: current color
+    :return: tuple
     """
     global offset
     clr = iteration_ * offset
@@ -121,7 +121,7 @@ def draw_stack():
     """
     Draws stack.
 
-    :returns: None
+    :return: None
     """
     global x, y, offset, iteration, total, scale
     if iteration == 0:
@@ -144,7 +144,7 @@ def draw_cells():
     """
     Draws cells.
 
-    :returns: None
+    :return: None
     """
     global found, current_cells, last_cells, scale
     fill(0, 255, 0)

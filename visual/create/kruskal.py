@@ -25,7 +25,7 @@ def out_of_bounds(x, y):
     """
     Checks if indices are out of bounds.
 
-    :returns: indices outside maze
+    :return: bool
     """
     global row_count_with_walls, col_count_with_walls
     return x < 0 or y < 0 or x >= row_count_with_walls or y >= col_count_with_walls
@@ -52,7 +52,7 @@ def choose_edge():
     """
     Chooses edge to be drawn.
 
-    :returns: None
+    :return: None
     """
     global maze, edges, xy_to_set, set_to_xy, finished, current_edge
     chosen = False
@@ -86,7 +86,7 @@ def draw_edge():
     """
     Draws edge.
 
-    :returns: None
+    :return: None
     """
     global finished, current_edge, last_edge, scale
     fill(0, 255, 0)
@@ -107,7 +107,7 @@ def setup():
     """
     Setup function.
 
-    :returns: None
+    :return: None
     """
     global row_count_with_walls, col_count_with_walls, scale
     size(col_count_with_walls * scale, row_count_with_walls * scale, caption="Kruskal's algorithm")
@@ -119,7 +119,7 @@ def draw():
     """
     Draw function.
 
-    :returns: None
+    :return: None
     """
     choose_edge()
     draw_edge()

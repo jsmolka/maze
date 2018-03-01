@@ -48,7 +48,7 @@ def out_of_bounds(x, y):
     """
     Checks if indices are out of bounds.
 
-    :returns: indices outside maze
+    :return: bool
     """
     global row_count_with_walls, col_count_with_walls
     return x < 0 or y < 0 or x >= row_count_with_walls or y >= col_count_with_walls
@@ -70,7 +70,7 @@ def choose_cells():
     """
     Chooses cell from frontier.
 
-    :returns: None
+    :return: None
     """
     global frontier, dir_one, dir_two, finished, current_cells
     x, y = frontier.pop(random.randint(0, len(frontier) - 1))
@@ -99,7 +99,7 @@ def draw_cells():
     """
     Draws cells.
 
-    :returns: None
+    :return: None
     """
     global finished, current_cells, last_cells, scale
     fill(0, 255, 0)
@@ -120,7 +120,7 @@ def setup():
     """
     Setup function.
 
-    :returns: None
+    :return: None
     """
     global x, y, row_count_with_walls, col_count_with_walls, scale
     size(col_count_with_walls * scale, row_count_with_walls * scale, caption="Prim's algorithm")
@@ -133,7 +133,7 @@ def draw():
     """
     Draw function.
 
-    :returns: None
+    :return: None
     """
     choose_cells()
     draw_cells()

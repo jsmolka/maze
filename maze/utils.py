@@ -11,7 +11,7 @@ def stack_empty():
     """
     Creates empty spaghetti stack.
 
-    :returns: empty spaghetti stack
+    :return: tuple
     """
     return ()
 
@@ -22,7 +22,7 @@ def stack_push(stack, item):
 
     :param stack: stack to push into
     :param item: item to push into stack
-    :returns: stack with pushed item
+    :return: tuple
     """
     return item, stack
 
@@ -32,7 +32,7 @@ def stack_deque(stack):
     Converts spaghetti stack into deque.
 
     :param stack: stack to be converted
-    :returns: stack as list
+    :return: deque
     """
     deque = collections.deque()
     while stack:
@@ -47,7 +47,7 @@ def color(offset, iteration):
 
     :param offset: offset for each iteration
     :param iteration: current iteration
-    :returns: color for current iteration
+    :return: tuple
     """
     clr = iteration * offset
     return clr, 0, 255 - clr
@@ -59,7 +59,7 @@ def draw_path(solution, stack):
 
     :param solution: ndarray to draw stack in
     :param stack: stack which contains every second cell to draw
-    :returns: solution with drawn stack
+    :return: tuple
     """
     total = 2 * len(stack)
     offset = 255 / total
@@ -81,7 +81,7 @@ def upscale(maze, scale):
 
     :param maze: ndarray to be upscaled
     :param scale: scale factor
-    :returns: upscaled ndarray
+    :return: ndarray
     """
     if not isinstance(maze, np.ndarray):
         maze = np.array(maze)
@@ -95,7 +95,7 @@ def get_scale(maze):
     Calculates scale of upscaled maze.
 
     :param maze: ndarray to be processed
-    :returns: scale of upscaled ndarray
+    :return: ndarray
     """
     for x in range(len(maze)):
         for y in range(len(maze[0])):
@@ -108,7 +108,7 @@ def downscale(maze):
     Downscales maze.
 
     :param maze: ndarray to downscale
-    :returns: downscaled ndarray
+    :return: ndarray
     """
     if not isinstance(maze, np.ndarray):
         maze = np.array(maze)
