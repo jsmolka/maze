@@ -14,7 +14,7 @@ class Maze(base.MazeBase):
         """
         Constructor.
 
-        :return: new Maze
+        :return: Maze
         """
         super(Maze, self).__init__()
 
