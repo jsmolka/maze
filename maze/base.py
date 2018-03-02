@@ -35,7 +35,7 @@ class MazeBase:
         """
         Constructor.
 
-        :return: new MazeBase
+        :return: MazeBase
         """
         self.maze = None
         self.solution = None

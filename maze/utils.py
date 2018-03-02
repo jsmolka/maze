@@ -3,7 +3,16 @@ import collections
 
 
 class MazeError(Exception):
+    """
+    Maze error class.
+    """
     def __init__(self, e):
+        """
+        Constructor.
+
+        :param e: exception message
+        :return: MazeError
+        """
         super(MazeError, self).__init__(e)
 
 
