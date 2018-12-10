@@ -7,15 +7,9 @@ import maze.base as base
 
 
 class Maze(base.MazeBase):
-    """
-    This class contains the relevant create and solve algorithms.
-    """
+    """This class contains the relevant algorithms for creating and solving."""
     def __init__(self):
-        """
-        Constructor.
-
-        :return: Maze
-        """
+        """Constructor."""
         super(Maze, self).__init__()
 
         self._dir_one = [
@@ -33,14 +27,7 @@ class Maze(base.MazeBase):
         self._range = list(range(4))
 
     def create(self, row_count, col_count, algorithm):
-        """
-        Creates maze.
-
-        :param row_count: row count for the maze
-        :param col_count: column count for the maze
-        :param algorithm: algorithm used to create maze
-        :return: None
-        """
+        """Creates a maze for a given row and column count."""
         if (row_count or col_count) <= 0:
             raise utils.MazeError("Row or column count cannot be smaller than zero.")
 
@@ -63,41 +50,26 @@ class Maze(base.MazeBase):
 
         raise utils.MazeError(
             "Wrong algorithm <{}>.\n"
-            "Use \"Maze.Create.<algorithm>\" to choose an algorithm.".format(algorithm))
+            "Use \"Maze.Create.<algorithm>\" to choose an algorithm.".format(algorithm)
+        )
 
     @property
     def _random(self):
-        """
-        Random range to iterate over.
-
-        :return: list
-        """
+        """Returns a random range to iterate over."""
         random.shuffle(self._range)
         return self._range
 
     def _out_of_bounds(self, x, y):
-        """
-        Checks if indices are out of bounds.
-
-        :param x: x coordinate within the maze
-        :param y: y coordinate within the maze
-        :return: bool
-        """
+        """Checks if indices are out of bounds."""
         return x < 0 or y < 0 or x >= self.row_count_with_walls or y >= self.col_count_with_walls
 
     def solve(self, start, end, algorithm):
-        """
-        Solves maze.
-
-        :param start: tuple with start coordinates
-        :param end: tuple with end coordinates
-        :param algorithm: algorithm used to solve the maze
-        :return: None
-        """
+        """Solves a maze from start to finish."""
         if self.maze is None:
             raise utils.MazeError(
                 "Maze is not assigned.\n"
-                "Use the \"create\" or \"load_maze\" method to create or load a maze.")
+                "Use the \"create\" or \"load_maze\" method to create or load a maze."
+            )
 
         start = start if start else (0, 0)
         end = end if end else (self.row_count - 1, self.col_count - 1)
@@ -121,14 +93,11 @@ class Maze(base.MazeBase):
 
         raise utils.MazeError(
             "Wrong algorithm <{}>.\n"
-            "Use \"Algorithm.Solve.<algorithm>\" to choose an algorithm.".format(algorithm))
+            "Use \"Algorithm.Solve.<algorithm>\" to choose an algorithm.".format(algorithm)
+        )
 
     def _recursive_backtracking_c(self):
-        """
-        Creates a maze using the recursive backtracking algorithm in C.
-
-        :return: None
-        """
+        """Creates a maze using the recursive backtracking algorithm in C."""
         row_count, col_count = self.row_count, self.col_count
         row_count_with_walls, col_count_with_walls = self.row_count_with_walls, self.col_count_with_walls
 
@@ -137,48 +106,35 @@ class Maze(base.MazeBase):
         idx = x * col_count_with_walls + y
 
         self.maze = self.maze[:, :, ::3].flatten()
-        self._dll.recursive_backtracking(
+        self.get_dll().recursive_backtracking(
             self.maze, row_count, col_count, idx
         )
         self.maze = self.maze.reshape((row_count_with_walls, col_count_with_walls, 1))
         self.maze = self.maze.repeat(3, axis=2)
 
     def _create_walk(self, x, y):
-        """
-        Randomly walks from one pointer within the maze to another one.
-
-        :param x: x coordinate
-        :param y: y coordinate
-        :return: tuple
-        """
+        """Randomly walks from one pointer within the maze to another one."""
         for idx in self._random:  # Check adjacent cells randomly
             tx, ty = self._dir_two[idx](x, y)
             if not self._out_of_bounds(tx, ty) and self.maze[tx, ty, 0] == 0:  # Check if unvisited
                 self.maze[tx, ty] = self.maze[self._dir_one[idx](x, y)] = [255, 255, 255]  # Mark as visited
                 return tx, ty  # Return new cell
+
         return None, None  # Return stop values
 
     def _create_backtrack(self, stack):
-        """
-        Backtracks the stack until walking is possible again.
-
-        :param stack: stack with walked over cells
-        :return: tuple
-        """
+        """Backtracks the stack until walking is possible again."""
         while stack:
             x, y = stack.pop()
             for direction in self._dir_two:  # Check adjacent cells
                 tx, ty = direction(x, y)
                 if not self._out_of_bounds(tx, ty) and self.maze[tx, ty, 0] == 0:  # Check if unvisited
                     return x, y  # Return cell with unvisited neighbour
+
         return None, None  # Return stop values if stack is empty
 
     def _recursive_backtracking(self):
-        """
-        Creates a maze using the recursive backtracking algorithm.
-
-        :return: None
-        """
+        """Creates a maze using the recursive backtracking algorithm."""
         stack = collections.deque()  # List of visited cells [(x, y), ...]
 
         x = 2 * random.randint(0, self.row_count - 1) + 1
@@ -192,12 +148,7 @@ class Maze(base.MazeBase):
             x, y = self._create_backtrack(stack)
 
     def _hunt(self, hunt_list):
-        """
-        Scans maze for new position.
-
-        :param hunt_list: list of unfinished rows
-        :return: tuple
-        """
+        """Scans the maze for new position."""
         while hunt_list:
             for x in hunt_list:
                 finished = True
@@ -211,14 +162,11 @@ class Maze(base.MazeBase):
                 if finished:
                     hunt_list.remove(x)  # Remove finished row
                     break  # Restart loop
+
         return None, None  # Return stop values if all rows are finished
 
     def _hunt_and_kill(self):
-        """
-        Creates a maze using the hunt and kill algorithm.
-
-        :return: None
-        """
+        """Creates a maze using the hunt and kill algorithm."""
         hunt_list = list(range(1, self.row_count_with_walls - 1, 2))  # List of unfinished rows [x, ...]
 
         x = 2 * random.randint(0, self.row_count - 1) + 1
@@ -231,11 +179,7 @@ class Maze(base.MazeBase):
             x, y = self._hunt(hunt_list)
 
     def _eller(self):
-        """
-        Creates a maze using Eller's algorithm.
-
-        :return: None
-        """
+        """Creates a maze using Eller's algorithm."""
         row_stack = [0] * self.col_count  # List of set indices [set index, ...]
         set_list = []  # List of set indices with positions [(set index, position), ...]
         set_index = 1
@@ -307,11 +251,7 @@ class Maze(base.MazeBase):
                             self.maze[x + 1, link_position] = [255, 255, 255]  # Mark link as visited
 
     def _sidewinder(self):
-        """
-        Creates a maze using the sidewinder algorithm
-
-        :return: None
-        """
+        """Creates a maze using the sidewinder algorithm."""
         # Create first row
         for y in range(1, self.col_count_with_walls - 1):
             self.maze[1, y] = [255, 255, 255]
@@ -338,11 +278,7 @@ class Maze(base.MazeBase):
             self.maze[x - 1, row_stack[idx]] = [255, 255, 255]  # Mark as visited
 
     def _prim(self):
-        """
-        Creates a maze using Prim's algorithm.
-
-        :return: None
-        """
+        """Creates a maze using Prim's algorithm."""
         frontier = []  # List of unvisited cells [(x, y),...]
 
         # Start with random cell
@@ -376,11 +312,7 @@ class Maze(base.MazeBase):
                     self.maze[tx, ty, 0] = 1  # Mark as part of frontier
 
     def _kruskal(self):
-        """
-        Creates a maze using Kruskal's algorithm.
-
-        :return: None
-        """
+        """Creates a maze using Kruskal's algorithm."""
         xy_to_set = np.zeros((self.row_count_with_walls, self.col_count_with_walls), dtype=np.uint32)
         set_to_xy = []  # List of sets in order, set 0 at index 0 [[(x, y),...], ...]
         edges = collections.deque()  # List of possible edges [(x, y, direction), ...]
@@ -420,63 +352,40 @@ class Maze(base.MazeBase):
                     xy_to_set[pos] = new_set
 
     def _depth_first_search_c(self, start, end):
-        """
-        Solves a maze using depth-first search in C.
-
-        :param start: tuple of start coordinates
-        :param end: tuple of end coordinates
-        :return: None
-        """
+        """Solves a maze using depth-first search in C."""
         start = start[0] * self.col_count_with_walls + start[1]
         end = end[0] * self.col_count_with_walls + end[1]
 
         self.solution = self.solution.flatten()
-        self._dll.depth_first_search(
+        self.get_dll().depth_first_search(
             self.maze[:, :, ::3].flatten(), self.solution, self.col_count, start, end
         )
         self.solution = self.solution.reshape((self.row_count_with_walls, self.col_count_with_walls, 3))
 
     def _solve_walk(self, x, y, visited):
-        """
-        Walks over a maze.
-
-        :param x: x coordinate
-        :param y: y coordinate
-        :param visited: ndarray of visited cells
-        :return: tuple
-        """
+        """Walks over a maze."""
         for idx in range(4):  # Check adjacent cells
             bx, by = self._dir_one[idx](x, y)
             if visited[bx, by, 0] == 255:  # Check if unvisited
                 tx, ty = self._dir_two[idx](x, y)
                 visited[bx, by, 0] = visited[tx, ty, 0] = 0  # Mark as visited
                 return tx, ty  # Return new cell
+
         return None, None  # Return stop values
 
     def _solve_backtrack(self, stack, visited):
-        """
-        Backtracks a stacks.
-
-        :param stack: stack to backtrack
-        :param visited: ndarray of visited cells
-        :return: tuple
-        """
+        """Backtracks a stacks."""
         while stack:
             x, y = stack.pop()
             for direction in self._dir_one:  # Check adjacent cells
                 tx, ty = direction(x, y)
                 if visited[tx, ty, 0] == 255:  # Check if unvisited
                     return x, y  # Return cell with unvisited neighbour
+
         return None, None  # Return stop values if stack is empty and no new cell was found
 
     def _depth_first_search(self, start, end):
-        """
-        Solves a maze using depth-first search.
-
-        :param start: tuple of start coordinates
-        :param end: tuple of end coordinates
-        :return: None
-        """
+        """Solves a maze using depth-first search."""
         visited = self.maze.copy()  # List of visited cells, value of visited cell is 0
         stack = collections.deque()  # List of visited cells [(x, y), ...]
 
@@ -494,13 +403,7 @@ class Maze(base.MazeBase):
         raise utils.MazeError("No solution found.")
 
     def _enqueue(self, queue, visited):
-        """
-        Queues next cells.
-
-        :param queue: queue for queueing
-        :param visited: ndarray of visited cells
-        :return: None
-        """
+        """Queues next cells."""
         cell = queue.popleft()
         x, y = cell[0]
         for idx in range(4):  # Check adjacent cells
@@ -511,13 +414,7 @@ class Maze(base.MazeBase):
                 queue.append(utils.stack_push(cell, (tx, ty)))
 
     def _breadth_first_search(self, start, end):
-        """
-        Solves a maze using breadth-first search.
-
-        :param start: tuple with start coordinates
-        :param end: tuple with end coordinates
-        :return: None
-        """
+        """Solves a maze using breadth-first search."""
         visited = self.maze.copy()  # List of visited cells, value of visited cell is 0
         queue = collections.deque()  # List of cells [cell, ...]
         cell = utils.stack_empty()  # Tuple of current cell with according stack ((x, y), stack)

@@ -27,7 +27,7 @@ setuptools.setup(
     ],
     package_data={
         "maze": [
-            "lib/*.dll"
+            "bin/maze64.dll"
         ]
     }
 )

@@ -29,11 +29,7 @@ y = 0  # Column index
 
 
 def create_row_stack():
-    """
-    Creates row stack.
-
-    :return: None
-    """
+    """Creates the row stack."""
     global col_count, row_stack, connect_list, set_index
     connect_list = collections.deque()
 
@@ -62,11 +58,7 @@ def create_row_stack():
 
 
 def create_cells():
-    """
-    Creates current cells list.
-
-    :return: None
-    """
+    """Creates the current cells list."""
     global x, y, row_count_with_walls, col_count, set_list, row_stack, connect_list, set_index, creating_cells, finished, current_cells
     current_cells = []
 
@@ -102,11 +94,7 @@ def create_cells():
 
 
 def create_links():
-    """
-    Creates links.
-
-    :return: None
-    """
+    """Creates the links."""
     global x, col_count, row_stack, set_list, creating_cells, already_sorted, current_cells
     if not already_sorted:
         row_stack = [0] * col_count  # Reset row stack
@@ -138,11 +126,7 @@ def create_links():
 
 
 def draw_cells():
-    """
-    Draws cells.
-
-    :return: None
-    """
+    """Draws the cells."""
     global finished, current_cells, last_cells, scale
     fill(0, 255, 0)
     for x, y in current_cells:
@@ -158,11 +142,7 @@ def draw_cells():
 
 
 def setup():
-    """
-    Setup function.
-
-    :return: None
-    """
+    """Setup function."""
     global row_count_with_walls, col_count_with_walls, scale
     size(col_count_with_walls * scale, row_count_with_walls * scale, caption="Eller's algorithm")
     background(0)
@@ -171,11 +151,7 @@ def setup():
 
 
 def draw():
-    """
-    Draw function.
-
-    :return: None
-    """
+    """Draw function."""
     global creating_cells
     if creating_cells:
         create_cells()

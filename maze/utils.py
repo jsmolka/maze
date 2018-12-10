@@ -3,73 +3,41 @@ import collections
 
 
 class MazeError(Exception):
-    """
-    Maze error class.
-    """
+    """Maze error class."""
     def __init__(self, e):
-        """
-        Constructor.
-
-        :param e: exception message
-        :return: MazeError
-        """
+        """Constructor."""
         super(MazeError, self).__init__(e)
 
 
 def stack_empty():
-    """
-    Creates empty spaghetti stack.
-
-    :return: tuple
-    """
+    """Creates empty spaghetti stack."""
     return ()
 
 
 def stack_push(stack, item):
-    """
-    Pushes item into spaghetti stack.
-
-    :param stack: stack to push into
-    :param item: item to push into stack
-    :return: tuple
-    """
+    """Pushes item into spaghetti stack."""
     return item, stack
 
 
 def stack_deque(stack):
-    """
-    Converts spaghetti stack into deque.
-
-    :param stack: stack to be converted
-    :return: deque
-    """
+    """Converts spaghetti stack into deque."""
     deque = collections.deque()
     while stack:
         item, stack = stack
         deque.appendleft(item)
+
     return deque
 
 
 def color(offset, iteration):
-    """
-    Returns color for current iteration.
-
-    :param offset: offset for each iteration
-    :param iteration: current iteration
-    :return: tuple
-    """
+    """Returns color for current iteration."""
     clr = iteration * offset
+
     return clr, 0, 255 - clr
 
 
 def draw_path(solution, stack):
-    """
-    Draws path in solution.
-
-    :param solution: ndarray to draw stack in
-    :param stack: stack which contains every second cell to draw
-    :return: tuple
-    """
+    """Draws path in solution."""
     total = 2 * len(stack)
     offset = 255 / total
     iteration = 2
@@ -85,27 +53,17 @@ def draw_path(solution, stack):
 
 
 def upscale(maze, scale):
-    """
-    Upscales maze.
-
-    :param maze: ndarray to be upscaled
-    :param scale: scale factor
-    :return: ndarray
-    """
+    """Upscales maze."""
     if not isinstance(maze, np.ndarray):
         maze = np.array(maze)
     if scale <= 1:
         return maze
+
     return maze.repeat(scale, axis=0).repeat(scale, axis=1)
 
 
 def get_scale(maze):
-    """
-    Calculates scale of upscaled maze.
-
-    :param maze: ndarray to be processed
-    :return: ndarray
-    """
+    """Calculates scale of upscaled maze."""
     for x in range(len(maze)):
         for y in range(len(maze[0])):
             if maze[x, y, 0] != 0:
@@ -113,15 +71,11 @@ def get_scale(maze):
 
 
 def downscale(maze):
-    """
-    Downscales maze.
-
-    :param maze: ndarray to downscale
-    :return: ndarray
-    """
+    """Downscales maze."""
     if not isinstance(maze, np.ndarray):
         maze = np.array(maze)
     scale = get_scale(maze)
     if scale <= 1:
         return maze
+        
     return maze[::scale, ::scale]

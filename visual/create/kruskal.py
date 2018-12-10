@@ -22,11 +22,7 @@ finished = False
 
 
 def out_of_bounds(x, y):
-    """
-    Checks if indices are out of bounds.
-
-    :return: bool
-    """
+    """Checks if indices are out of bounds."""
     global row_count_with_walls, col_count_with_walls
     return x < 0 or y < 0 or x >= row_count_with_walls or y >= col_count_with_walls
 
@@ -49,11 +45,7 @@ random.shuffle(edges)
 
 
 def choose_edge():
-    """
-    Chooses edge to be drawn.
-
-    :return: None
-    """
+    """Chooses the edge to be drawn."""
     global maze, edges, xy_to_set, set_to_xy, finished, current_edge
     chosen = False
     while not chosen:
@@ -83,11 +75,7 @@ def choose_edge():
 
 
 def draw_edge():
-    """
-    Draws edge.
-
-    :return: None
-    """
+    """Draws the edge."""
     global finished, current_edge, last_edge, scale
     fill(0, 255, 0)
     for x, y in current_edge:
@@ -104,11 +92,7 @@ def draw_edge():
 
 
 def setup():
-    """
-    Setup function.
-
-    :return: None
-    """
+    """Setup function."""
     global row_count_with_walls, col_count_with_walls, scale
     size(col_count_with_walls * scale, row_count_with_walls * scale, caption="Kruskal's algorithm")
     background(0)
@@ -116,11 +100,7 @@ def setup():
 
 
 def draw():
-    """
-    Draw function.
-
-    :return: None
-    """
+    """Draw function."""
     choose_edge()
     draw_edge()
 

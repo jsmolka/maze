@@ -43,32 +43,20 @@ dir_two = [
 
 
 def _random():
-    """
-    Shuffles range.
-
-    :return: None
-    """
+    """Returns a randomly shuffled range."""
     global _range
     random.shuffle(_range)
     return _range
 
 
 def out_of_bounds(x, y):
-    """
-    Checks if indices are out of bounds.
-
-    :return: None
-    """
+    """Checks if indices are out of bounds."""
     global row_count_with_walls, col_count_with_walls
     return x < 0 or y < 0 or x >= row_count_with_walls or y >= col_count_with_walls
 
 
 def walk():
-    """
-    Walks over maze.
-
-    :return: None
-    """
+    """Walks over a maze."""
     global x, y, maze, dir_one, dir_one, dir_two, iteration, walking, current_cells
     for idx in _random():  # Check adjacent cells randomly
         tx, ty = dir_two[idx](x, y)
@@ -83,11 +71,7 @@ def walk():
 
 
 def hunt():
-    """
-    Scans maze for new position.
-
-    :return: None
-    """
+    """Scans the maze for a new position."""
     global x, y, row_count_with_walls, col_count_with_walls, maze, dir_two, iteration, last_iteration, walking, finished
     x = iteration
     for y in range(1, col_count_with_walls - 1, 2):
@@ -105,11 +89,7 @@ def hunt():
 
 
 def draw_cells():
-    """
-    Draws cells.
-
-    :return: None
-    """
+    """Draws the cells."""
     global finished, current_cells, last_cells, scale
     fill(0, 255, 0)
     for x, y in current_cells:
@@ -130,11 +110,7 @@ def draw_cells():
 
 
 def draw_row():
-    """
-    Draws row.
-
-    :return: None
-    """
+    """Draws the row."""
     global maze, iteration, last_iteration, walking, finished, scale
     if not walking:  # Draw green line
         for i in range(len(maze[0])):  # Redraw previous row
@@ -157,11 +133,7 @@ def draw_row():
 
 
 def setup():
-    """
-    Setup function.
-
-    :return: None
-    """
+    """Setup function."""
     global row_count_with_walls, col_count_with_walls, scale
     size(col_count_with_walls * scale, row_count_with_walls * scale, caption="Hunt and kill algorithm")
     background(0)
@@ -169,11 +141,7 @@ def setup():
 
 
 def draw():
-    """
-    Draw function.
-
-    :return: None
-    """
+    """Draw function."""
     global walking, current_cells
     if walking:
         walk()

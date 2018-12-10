@@ -54,11 +54,7 @@ dir_two = [
 
 
 def walk():
-    """
-    Walks over maze.
-
-    :return: None
-    """
+    """Walks over a maze."""
     global x, y, stack, visited_cells, dir_one, dir_two, walking, first_time, current_cells
     for idx in range(4):  # Check adjacent cells
         bx, by = dir_one[idx](x, y)
@@ -73,11 +69,7 @@ def walk():
 
 
 def backtrack():
-    """
-    Backtracks stack.
-
-    :return: None
-    """
+    """Backtracks the stack."""
     global x, y, stack, visited_cells, walking, first_time
     if first_time:  # Compensate for first backtrack after walking
         first_time = False
@@ -92,11 +84,7 @@ def backtrack():
 
 
 def draw_maze():
-    """
-    Draws maze.
-
-    :return: None
-    """
+    """Draws the maze."""
     global m, row_count_with_walls, col_count_with_walls, scale
     fill(255)
     for x in range(row_count_with_walls):
@@ -106,23 +94,14 @@ def draw_maze():
 
 
 def color(iteration_):
-    """
-    Returns color for current iteration.
-
-    :param iteration_: current iteration
-    :return: tuple
-    """
+    """Returns color for current iteration."""
     global offset
     clr = iteration_ * offset
     return clr, 0, 255 - clr
 
 
 def draw_stack():
-    """
-    Draws stack.
-
-    :return: None
-    """
+    """Draws the stack."""
     global x, y, offset, iteration, total, scale
     if iteration == 0:
         x, y = stack.popleft()
@@ -141,11 +120,7 @@ def draw_stack():
 
 
 def draw_cells():
-    """
-    Draws cells.
-
-    :return: None
-    """
+    """Draws the cells."""
     global found, current_cells, last_cells, scale
     fill(0, 255, 0)
     for x, y in current_cells:
@@ -161,11 +136,7 @@ def draw_cells():
 
 
 def setup():
-    """
-    Setup function.
-
-    :return: None
-    """
+    """Setup function."""
     global row_count_with_walls, col_count_with_walls, scale
     size(col_count_with_walls * scale, row_count_with_walls * scale, caption=Maze.Solve.DEPTH.value)
     background(0)
@@ -174,11 +145,7 @@ def setup():
 
 
 def draw():
-    """
-    Draw function.
-
-    :return: None
-    """
+    """Draw function."""
     global x, y, stack, offset, iteration, total, end, walking, found, current_cells
     if not found:
         if walking:

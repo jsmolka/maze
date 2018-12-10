@@ -23,11 +23,7 @@ y = 1  # Cell index
 
 
 def create_first_row():
-    """
-    Creates first row.
-
-    :return: None
-    """
+    """Creates the first row."""
     global x, y, col_count_with_walls, first_row, current_cells
     if y == 1:  # Three cells to start because column number is uneven
         current_cells = [(1, y), (1, y + 1), (1, y + 2)]
@@ -42,11 +38,7 @@ def create_first_row():
 
 
 def create_cells():
-    """
-    Creates cells.
-
-    :return: None
-    """
+    """Creates the cells."""
     global x, y, maze, row_stack, row_count_with_walls, col_count_with_walls, finished, current_cells
     maze[x, y] = [255, 255, 255]
     row_stack.append(y)
@@ -79,11 +71,7 @@ def create_cells():
 
 
 def draw_cells():
-    """
-    Draws cells.
-
-    :return: None
-    """
+    """Draws the cells."""
     global finished, current_cells, last_cells, scale
     fill(0, 255, 0)
     for x, y in current_cells:
@@ -99,11 +87,7 @@ def draw_cells():
 
 
 def setup():
-    """
-    Setup function.
-
-    :return: None
-    """
+    """Setup function."""
     global row_count_with_walls, col_count_with_walls, scale
     size(col_count_with_walls * scale, row_count_with_walls * scale, caption="Sidewinder algorithm")
     background(0)
@@ -111,11 +95,7 @@ def setup():
 
 
 def draw():
-    """
-    Draw function.
-
-    :return: None
-    """
+    """Draw function."""
     global first_row
     if first_row:
         create_first_row()

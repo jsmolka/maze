@@ -34,22 +34,14 @@ dir_two = [
 
 
 def _random():
-    """
-    Shuffles range.
-
-    :return: None
-    """
+    """Returns a randomly shuffled range."""
     global _range
     random.shuffle(_range)
     return _range
 
 
 def out_of_bounds(x, y):
-    """
-    Checks if indices are out of bounds.
-
-    :return: bool
-    """
+    """Checks if indices are out of bounds."""
     global row_count_with_walls, col_count_with_walls
     return x < 0 or y < 0 or x >= row_count_with_walls or y >= col_count_with_walls
 
@@ -67,11 +59,7 @@ for direction in dir_two:
 
 
 def choose_cells():
-    """
-    Chooses cell from frontier.
-
-    :return: None
-    """
+    """Chooses a cell from the frontier."""
     global frontier, dir_one, dir_two, finished, current_cells
     x, y = frontier.pop(random.randint(0, len(frontier) - 1))
 
@@ -96,11 +84,7 @@ def choose_cells():
 
 
 def draw_cells():
-    """
-    Draws cells.
-
-    :return: None
-    """
+    """Draws the cells."""
     global finished, current_cells, last_cells, scale
     fill(0, 255, 0)
     for x, y in current_cells:
@@ -117,11 +101,7 @@ def draw_cells():
 
 
 def setup():
-    """
-    Setup function.
-
-    :return: None
-    """
+    """Setup function."""
     global x, y, row_count_with_walls, col_count_with_walls, scale
     size(col_count_with_walls * scale, row_count_with_walls * scale, caption="Prim's algorithm")
     background(0)
@@ -130,11 +110,7 @@ def setup():
 
 
 def draw():
-    """
-    Draw function.
-
-    :return: None
-    """
+    """Draw function."""
     choose_cells()
     draw_cells()
 

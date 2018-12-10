@@ -1,53 +1,61 @@
 #include "recursive_backtracking.h"
 
-uint8_t* maze;
-dir_t* dir_one;
-dir_t* dir_two;
-int* range;
+#include <stdbool.h>
+#include <stdlib.h>
+#include <time.h>
+
+#include "directions.h"
+#include "shuffle.h"
+#include "stack.h"
+
+uint8_t *maze;
+dir_t *dir_one;
+dir_t *dir_two;
+int *range;
 int row_count_with_walls;
 int col_count_with_walls;
 int max_idx;
 
-bool out_ouf_bounds(int idx)
+static bool out_ouf_bounds(int idx)
 {
     return idx >= max_idx || (idx % col_count_with_walls) % 2 == 0;
 }
 
-int c_walk(int idx)
+static int walk(int idx)
 {
     shuffle(range);
-    for (int i = 0; i < 4; i++)
+
+    for (int i = 0; i < 4; ++i)
     {
-        int j = range[i];
-        int idx2 = dir_two[j](idx);
+        const int j = range[i];
+        const int idx2 = dir_two[j](idx);
         if (!out_ouf_bounds(idx2) && maze[idx2] == 0)
         {
-            int idx1 = dir_one[j](idx);
+            const int idx1 = dir_one[j](idx);
             maze[idx1] = maze[idx2] = 255;
+            
             return idx2;
         }
     }
     return -1;
 }
 
-int c_backtrack(stack_t* stack)
+static int backtrack(stack_t *stack)
 {
     while (!stack_empty(stack))
     {
-        int idx = stack_pop(stack);
-        for (int i = 0; i < 4; i++)
+        const int idx = stack_pop(stack);
+        for (int i = 0; i < 4; ++i)
         {
-            int tidx = dir_two[i](idx);
+            const int tidx = dir_two[i](idx);
             if (!out_ouf_bounds(tidx) && maze[tidx] == 0)
-            {
                 return idx;
-            }
         }
     }
     return -1;
 }
 
-void recursive_backtracking(uint8_t* input, int row_count, int col_count, int idx)
+void recursive_backtracking(uint8_t *input, int row_count, int col_count, int idx)
 {
     srand(time(NULL));
 
@@ -68,14 +76,20 @@ void recursive_backtracking(uint8_t* input, int row_count, int col_count, int id
     maze = input;
     maze[idx] = 255;
     
-    stack_t* stack = stack_new();
+    stack_t *stack = stack_new();
     while (idx != -1)
     {
         while (idx != -1)
         {
             stack_push(stack, idx);
-            idx = c_walk(idx);
+            idx = walk(idx);
         }
-        idx = c_backtrack(stack);
+        idx = backtrack(stack);
     }
+
+    free(dir_one);
+    free(dir_two);
+    free(range);
+    free(stack);
 }
+

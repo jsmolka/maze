@@ -1,8 +1,6 @@
 #ifndef DIRECTIONS_H
 #define DIRECTIONS_H
 
-#include <stdlib.h>
-
 typedef int (*dir_t)(int);
 
 int n1(int idx);

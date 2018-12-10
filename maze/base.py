@@ -7,14 +7,10 @@ from PIL import Image
 import maze.utils as util
 
 
-class MazeBase:
-    """
-    This class contains all necessary function / variables which are not create or solve algorithms.
-    """
+class MazeBase(object):
+    """This class contains base functions."""
     class Create(enum.Enum):
-        """
-        Enum for creation algorithms.
-        """
+        """Enum for creation algorithms."""
         C            = "Recursive backtracking algorithm C"
         BACKTRACKING = "Recursive backtracking algorithm"
         HUNT         = "Hunt and kill algorithm"
@@ -24,78 +20,43 @@ class MazeBase:
         KRUSKAL      = "Kruskal's algorithm"
 
     class Solve(enum.Enum):
-        """
-        Enum for solving algorithms.
-        """
+        """Enum for solving algorithms."""
         C       = "Depth-first search C"
         DEPTH   = "Depth-first search"
         BREADTH = "Breadth-first search"
 
     def __init__(self):
-        """
-        Constructor.
-
-        :return: MazeBase
-        """
+        """Constructor."""
         self.maze = None
         self.solution = None
-        self._load_dll()
+        self._dll = None
 
     @property
     def row_count_with_walls(self):
-        """
-        Returns row count with walls.
-
-        :return: int
-        """
-        try:
-            return self.maze.shape[0]
-        except Exception:
-            raise util.MazeError("Unable to get row count. Maze and solution are not assigned.")
+        """Returns the mazes row count with walls."""
+        return self.maze.shape[0]
 
     @property
     def col_count_with_walls(self):
-        """
-        Returns column count with walls.
-
-        :return: int
-        """
-        try:
-            return self.maze.shape[1]
-        except Exception:
-            raise util.MazeError("Unable to get col count. Maze and solution are not assigned.")
+        """Returns the mazes column count with walls."""
+        return self.maze.shape[1]
 
     @property
     def row_count(self):
-        """
-        Returns row count.
-
-        :return: int
-        """
+        """Returns the mazes row count."""
         return self.row_count_with_walls // 2
 
     @property
     def col_count(self):
-        """
-        Returns column count.
-
-        :return: int
-        """
+        """Returns the mazes column count."""
         return self.col_count_with_walls // 2
 
     def _load_dll(self):
-        """
-        Loads C dll and sets parameter types.
-
-        :return: None
-        """
-        pth = os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib", "maze32.dll")
-        self._dll = ctypes.cdll.LoadLibrary(pth)
-
-        try:
-            ndpointer = np.ctypeslib.ndpointer(ctypes.c_uint8, flags="C_CONTIGUOUS")
-        except Exception:
-            raise util.MazeError("Failed loading maze32.dll from <{}>".format(pth))
+        """Loads the dll and sets parameter types."""
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bin", "maze64.dll")
+        self._dll = ctypes.cdll.LoadLibrary(path)
+        
+        ndpointer = np.ctypeslib.ndpointer(ctypes.c_uint8, flags="C_CONTIGUOUS")
 
         self._dll.recursive_backtracking.argtypes = [
             ndpointer, ctypes.c_int, ctypes.c_int, ctypes.c_int
@@ -105,43 +66,35 @@ class MazeBase:
             ndpointer, ndpointer, ctypes.c_int, ctypes.c_int, ctypes.c_int
         ]
 
-    def save_maze(self, file_name="maze.png", scale=3):
-        """
-        Saves maze as png.
+    def get_dll(self):
+        """Returns the loaded dll."""
+        if self._dll is None:
+            self._load_dll()
 
-        :param file_name: file name of saved file
-        :param scale: upscale factor
-        :return: None
-        """
+        return self._dll
+
+    def save_maze(self, file_name="maze.png", scale=3):
+        """Saves the maze as png."""
         if self.maze is None:
             raise util.MazeError(
                 "Cannot save maze because it is not assigned.\n"
-                "Use the \"create\" or \"load_maze\" method to create or load a maze.")
+                "Use the \"create\" or \"load_maze\" method to create or load a maze."
+            )
 
         Image.fromarray(util.upscale(self.maze, scale), "RGB").save(file_name, "png")
 
     def save_solution(self, file_name="solution.png", scale=3):
-        """
-        Saves solution as png.
-
-        :param file_name: file name of saved file
-        :param scale: upscale factor
-        :return: None
-        """
+        """Saves the solution as png."""
         if self.solution is None:
             raise util.MazeError(
                 "Cannot save solution because it is not assigned.\n"
-                "Use the \"solve\" method to solve a maze.")
+                "Use the \"solve\" method to solve a maze."
+            )
 
         Image.fromarray(util.upscale(self.solution, scale), "RGB").save(file_name, "png")
 
     def load_maze(self, file_name="maze.png"):
-        """
-        Loads maze from png.
-
-        :param file_name: file name of file to load
-        :return: None
-        """
+        """Loads the maze from png."""
         if not os.path.isfile(file_name):
             raise util.MazeError("Cannot load maze because <{}> does not exist.".format(file_name))
 

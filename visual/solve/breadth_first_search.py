@@ -29,13 +29,7 @@ end = tuple([2 * x + 1 for x in end])
 
 
 def stack_push(stack, item):
-    """
-    Pushes item into spaghetti stack.
-
-    :param stack: stack to push into
-    :param item: item to push into stack
-    :return: tuple
-    """
+    """Pushes an item into spaghetti stack."""
     return item, stack
 
 
@@ -66,12 +60,7 @@ dir_two = [
 
 
 def stack_deque(stack):
-    """
-    Converts spaghetti stack into deque.
-
-    :param stack: stack to be converted
-    :return: deque
-    """
+    """Converts the spaghetti stack into a deque."""
     deque = collections.deque()
     while stack:
         item, stack = stack
@@ -80,11 +69,7 @@ def stack_deque(stack):
 
 
 def enqueue():
-    """
-    Queues next cells.
-
-    :return: None
-    """
+    """Queues next cells."""
     global deque, visited_cells, dir_one, dir_two, current_cells
     cell = deque.popleft()
     x, y = cell[0]
@@ -98,8 +83,7 @@ def enqueue():
 
 
 def draw_maze():
-    """
-    Draws maze.
+    """Draws the maze.
 
     :return: None
     """
@@ -112,23 +96,14 @@ def draw_maze():
 
 
 def color(iteration_):
-    """
-    Returns color for current iteration.
-
-    :param iteration_: current iteration
-    :return: tuple
-    """
+    """Returns the color for current iteration."""
     global offset
     clr = iteration_ * offset
     return clr, 0, 255 - clr
 
 
 def draw_stack():
-    """
-    Draws stack.
-
-    :return: None
-    """
+    """Draws the stack."""
     global x, y, offset, iteration, total, scale
     if iteration == 0:
         x, y = stack.popleft()
@@ -147,11 +122,7 @@ def draw_stack():
 
 
 def draw_cells():
-    """
-    Draws cells.
-
-    :return: None
-    """
+    """Draws the cells."""
     global found, current_cells, last_cells, scale
     fill(0, 255, 0)
     for x, y in current_cells:
@@ -167,11 +138,7 @@ def draw_cells():
 
 
 def setup():
-    """
-    Setup function.
-
-    :return: None
-    """
+    """Setup function."""
     global row_count_with_walls, col_count_with_walls, scale
     size(col_count_with_walls * scale, row_count_with_walls * scale, caption=Maze.Solve.BREADTH.value)
     background(0)
@@ -180,11 +147,7 @@ def setup():
 
 
 def draw():
-    """
-    Draw function.
-
-    :return: None
-    """
+    """Draw function."""
     global deque, stack, end, offset, iteration, total, found
     if not found:
         enqueue()
