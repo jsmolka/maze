@@ -2,7 +2,7 @@
 
 #include <stdlib.h>
 
-void shuffle(int* array)
+void shuffle(int *array)
 {
     for (int i = 0; i < 3; ++i)
     {

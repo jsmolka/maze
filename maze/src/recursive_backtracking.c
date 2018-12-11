@@ -11,7 +11,7 @@
 uint8_t *maze;
 dir_t *dir_one;
 dir_t *dir_two;
-int *range;
+int range[4] = {0, 1, 2, 3};
 int row_count_with_walls;
 int col_count_with_walls;
 int max_idx;
@@ -63,15 +63,9 @@ void recursive_backtracking(uint8_t *input, int row_count, int col_count, int id
     col_count_with_walls = 2 * col_count + 1;
     max_idx = row_count_with_walls * col_count_with_walls;
 
-    initialize(col_count_with_walls);
+    init(col_count_with_walls);
     dir_one = get_dir_one();
     dir_two = get_dir_two();
-
-    range = malloc(4 * sizeof(int));
-    range[0] = 0;
-    range[1] = 1;
-    range[2] = 2;
-    range[3] = 3;
 
     maze = input;
     maze[idx] = 255;
@@ -86,10 +80,8 @@ void recursive_backtracking(uint8_t *input, int row_count, int col_count, int id
         }
         idx = backtrack(stack);
     }
-
+    stack_free(stack);
     free(dir_one);
     free(dir_two);
-    free(range);
-    free(stack);
 }
 

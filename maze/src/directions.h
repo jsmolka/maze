@@ -12,9 +12,9 @@ int s2(int idx);
 int e2(int idx);
 int w2(int idx);
 
-void initialize(int width);
+void init(int width);
 
-dir_t* get_dir_one();
-dir_t* get_dir_two();
+dir_t *get_dir_one(void);
+dir_t *get_dir_two(void);
 
-#endif
+#endif /* DIRECTIONS_H */

@@ -44,7 +44,7 @@ static int backtrack(stack_t *stack)
 
 static void color(uint8_t *output, int idx, int iteration, float offset)
 {
-    const int clr = (int) iteration * offset;
+    const int clr = (int)iteration * offset;
     
     output[idx] = 255 - clr;
     output[idx + 1] = 0;
@@ -73,7 +73,7 @@ void depth_first_search(uint8_t *input, uint8_t *output, int col_count, int star
 {
     col_count_with_walls = 2 * col_count + 1;
 
-    initialize(col_count_with_walls);
+    init(col_count_with_walls);
     dir_one = get_dir_one();
     dir_two = get_dir_two();
 
@@ -89,14 +89,15 @@ void depth_first_search(uint8_t *input, uint8_t *output, int col_count, int star
         {
             stack_push(stack, idx);
             if (idx == end)
-                return draw_path(stack, output);
-            
+            {
+                draw_path(stack, output);
+                break;
+            }
             idx = walk(idx);
         }
         idx = backtrack(stack);
     }
-
+    stack_free(stack);
     free(dir_one);
     free(dir_two);
-    free(stack);
 }

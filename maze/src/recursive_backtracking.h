@@ -5,4 +5,4 @@
 
 void recursive_backtracking(uint8_t *input, int row_count, int col_count, int idx);
 
-#endif
+#endif /* RECURSIVE_BACKTRACKING_H */
